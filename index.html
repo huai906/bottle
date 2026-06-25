@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🍾 树洞漂流瓶</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
             font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
             background: linear-gradient(145deg, #f0ebf5 0%, #ddd6e8 100%);
@@ -15,12 +19,13 @@
         .app {
             max-width: 720px;
             margin: 0 auto;
-            background: rgba(255,255,255,0.7);
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             border-radius: 32px 32px 24px 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
             padding: 20px 16px 24px;
-            border: 1px solid rgba(255,255,255,0.6);
+            border: 1px solid rgba(255, 255, 255, 0.6);
         }
         h1 {
             display: flex;
@@ -36,10 +41,10 @@
             font-weight: 400;
             color: #6a4f7a;
             margin-left: auto;
-            background: rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.5);
             padding: 3px 14px;
             border-radius: 40px;
-            border: 1px solid rgba(255,255,255,0.8);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
         .sub {
             color: #4d365c;
@@ -47,16 +52,16 @@
             margin-bottom: 16px;
             padding: 6px 14px;
             border-left: 3px solid #b38bc9;
-            background: rgba(255,240,245,0.2);
+            background: rgba(255, 240, 245, 0.2);
             border-radius: 0 12px 12px 0;
         }
         .card {
-            background: rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(4px);
             border-radius: 20px;
             padding: 16px 14px;
             margin-bottom: 14px;
-            border: 1px solid rgba(255,255,255,0.7);
+            border: 1px solid rgba(255, 255, 255, 0.7);
         }
         .row {
             display: flex;
@@ -70,21 +75,24 @@
             font-weight: 600;
             color: #3f2a4e;
         }
-        .row input, .row textarea, .row select {
+        .row input,
+        .row textarea,
+        .row select {
             flex: 1;
             min-width: 90px;
             padding: 10px 14px;
             border: 1px solid #d9c8e3;
             border-radius: 40px;
             font-size: 14px;
-            background: rgba(255,255,255,0.7);
+            background: rgba(255, 255, 255, 0.7);
             transition: 0.2s;
             outline: none;
             font-family: inherit;
         }
-        .row input:focus, .row textarea:focus {
+        .row input:focus,
+        .row textarea:focus {
             border-color: #a67bbd;
-            box-shadow: 0 0 0 3px rgba(166,123,189,0.15);
+            box-shadow: 0 0 0 3px rgba(166, 123, 189, 0.15);
             background: white;
         }
         .row textarea {
@@ -92,7 +100,10 @@
             resize: vertical;
             min-height: 56px;
         }
-        .row .half { flex: 1 1 calc(50% - 8px); min-width: 100px; }
+        .row .half {
+            flex: 1 1 calc(50% - 8px);
+            min-width: 100px;
+        }
         .btn-group {
             display: flex;
             flex-wrap: wrap;
@@ -112,17 +123,21 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            border: 1px solid rgba(255,255,255,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
-        .btn:active { transform: scale(0.96); }
+        .btn:active {
+            transform: scale(0.96);
+        }
         .btn-primary {
             background: #7d5b96;
             color: white;
-            box-shadow: 0 4px 12px rgba(125,91,150,0.25);
+            box-shadow: 0 4px 12px rgba(125, 91, 150, 0.25);
         }
-        .btn-primary:active { background: #684a80; }
+        .btn-primary:active {
+            background: #684a80;
+        }
         .btn-outline {
             background: transparent;
             border: 1.5px solid #7d5b96;
@@ -131,13 +146,16 @@
         .btn-success {
             background: #2f7a5c;
             color: white;
-            box-shadow: 0 4px 12px rgba(47,122,92,0.2);
+            box-shadow: 0 4px 12px rgba(47, 122, 92, 0.2);
         }
         .btn-ghost {
-            background: rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.3);
             border: 1px solid #c6b0d4;
         }
-        .btn-sm { padding: 5px 14px; font-size: 12px; }
+        .btn-sm {
+            padding: 5px 14px;
+            font-size: 12px;
+        }
         .status-tip {
             background: #f2eaf7;
             padding: 10px 16px;
@@ -151,15 +169,19 @@
             align-items: center;
             justify-content: center;
         }
-        .bottle-list { margin-top: 14px; border-top: 2px dashed #d3bfdf; padding-top: 14px; }
+        .bottle-list {
+            margin-top: 14px;
+            border-top: 2px dashed #d3bfdf;
+            padding-top: 14px;
+        }
         .bubble {
-            background: rgba(255,255,255,0.75);
+            background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(4px);
             border-radius: 18px 18px 18px 6px;
             padding: 14px 16px;
             margin-bottom: 14px;
             border-left: 4px solid #b38bc9;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
         }
         .bubble .meta {
             display: flex;
@@ -183,7 +205,7 @@
             overflow: hidden;
             max-width: 100%;
             cursor: pointer;
-            border: 1px solid rgba(0,0,0,0.06);
+            border: 1px solid rgba(0, 0, 0, 0.06);
         }
         .bubble .bubble-image img {
             width: 100%;
@@ -193,7 +215,7 @@
             background: #f5f0f8;
         }
         .bubble .reply-item {
-            background: rgba(240,248,245,0.6);
+            background: rgba(240, 248, 245, 0.6);
             border-radius: 14px 14px 14px 4px;
             padding: 10px 12px;
             margin-top: 8px;
@@ -201,7 +223,7 @@
             border-left: 3px solid #4f8a7a;
         }
         .bubble .reply-item.mine {
-            background: rgba(235,225,245,0.6);
+            background: rgba(235, 225, 245, 0.6);
             border-left-color: #9b7bb3;
         }
         .bubble .reply-item .rmeta {
@@ -212,7 +234,10 @@
             margin-bottom: 2px;
             font-weight: 500;
         }
-        .bubble .reply-item .rcontent { font-size: 14px; line-height: 1.4; }
+        .bubble .reply-item .rcontent {
+            font-size: 14px;
+            line-height: 1.4;
+        }
         .bubble .reply-item .reply-image {
             margin-top: 6px;
             border-radius: 10px;
@@ -263,14 +288,16 @@
             font-size: 14px;
         }
         .admin-panel {
-            background: rgba(255,255,255,0.6);
+            background: rgba(255, 255, 255, 0.6);
             border-radius: 20px;
             padding: 16px;
             margin-top: 16px;
             border: 2px solid #b38bc9;
             display: none;
         }
-        .admin-panel.open { display: block; }
+        .admin-panel.open {
+            display: block;
+        }
         .admin-panel h2 {
             font-size: 17px;
             color: #2a1a38;
@@ -295,16 +322,22 @@
             margin-bottom: 12px;
         }
         .admin-user-card {
-            background: rgba(255,255,255,0.7);
+            background: rgba(255, 255, 255, 0.7);
             border-radius: 14px;
             padding: 10px 12px;
             border: 1px solid #d9c8e3;
             font-size: 13px;
         }
-        .admin-user-card .name { font-weight: 600; color: #2a1a38; }
-        .admin-user-card .detail { font-size: 11px; color: #584065; }
+        .admin-user-card .name {
+            font-weight: 600;
+            color: #2a1a38;
+        }
+        .admin-user-card .detail {
+            font-size: 11px;
+            color: #584065;
+        }
         .admin-bottle-item {
-            background: rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.5);
             border-radius: 14px;
             padding: 12px;
             margin-bottom: 10px;
@@ -318,7 +351,7 @@
         .admin-bottle-item .admin-reply {
             font-size: 12px;
             color: #3f2a4e;
-            background: rgba(240,248,245,0.5);
+            background: rgba(240, 248, 245, 0.5);
             border-radius: 10px;
             padding: 6px 10px;
             margin-top: 4px;
@@ -353,7 +386,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0, 0, 0, 0.85);
             display: none;
             align-items: center;
             justify-content: center;
@@ -361,7 +394,9 @@
             padding: 16px;
             cursor: pointer;
         }
-        .image-modal.open { display: flex; }
+        .image-modal.open {
+            display: flex;
+        }
         .image-modal img {
             max-width: 100%;
             max-height: 90vh;
@@ -382,27 +417,38 @@
         }
         .reveal-modal-overlay {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 99999;
             padding: 20px;
         }
-        .reveal-modal-overlay.open { display: flex; }
+        .reveal-modal-overlay.open {
+            display: flex;
+        }
         .reveal-modal {
             background: white;
             border-radius: 24px;
             padding: 28px 24px 20px;
             max-width: 380px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             animation: fadeIn 0.2s ease;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
         .reveal-modal h3 {
             font-size: 18px;
@@ -429,7 +475,9 @@
             cursor: pointer;
             transition: 0.15s;
         }
-        .reveal-option:active { background: #f5f0f8; }
+        .reveal-option:active {
+            background: #f5f0f8;
+        }
         .reveal-option input[type="checkbox"] {
             width: 20px;
             height: 20px;
@@ -463,13 +511,17 @@
             color: #4d365c;
             border: none;
         }
-        .reveal-modal .btn-row .btn-cancel:active { background: #e0d4ea; }
+        .reveal-modal .btn-row .btn-cancel:active {
+            background: #e0d4ea;
+        }
         .reveal-modal .btn-row .btn-confirm {
             background: #7d5b96;
             color: white;
             border: none;
         }
-        .reveal-modal .btn-row .btn-confirm:active { background: #684a80; }
+        .reveal-modal .btn-row .btn-confirm:active {
+            background: #684a80;
+        }
         .reveal-modal .btn-row .btn-confirm:disabled {
             opacity: 0.4;
             cursor: not-allowed;
@@ -482,9 +534,15 @@
             display: none;
         }
         @media (max-width: 480px) {
-            .app { padding: 12px; }
-            .row .half { flex: 1 1 100%; }
-            .admin-user-grid { grid-template-columns: 1fr 1fr; }
+            .app {
+                padding: 12px;
+            }
+            .row .half {
+                flex: 1 1 100%;
+            }
+            .admin-user-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
     </style>
 </head>
@@ -592,46 +650,39 @@
     </div>
 
     <script>
-        // ============================================================
-        //  🍾 树洞漂流瓶 · 完整 JavaScript
-        //  后台密码：Syx0701！（不对外显示）
-        // ============================================================
-
         (function() {
-            // ---------- 🔐 后台密码 ----------
-            const ADMIN_PASSWORD = 'Syx0701！';
+            // ===== 后台密码 =====
+            var ADMIN_PASSWORD = 'Syx0701！';
+            var STORAGE_KEY = 'bottle_data_v4';
 
-            // ---------- 数据 ----------
-            const STORAGE_KEY = 'bottle_data_v4';
-            let bottles = [];
-            let idCounter = 1000;
-            let replyIdCounter = 5000;
-            let throwImageData = null;
-            let replyImageData = {};
-            let pendingReveal = null;
+            var bottles = [];
+            var idCounter = 1000;
+            var replyIdCounter = 5000;
+            var throwImageData = null;
+            var replyImageData = {};
+            var pendingReveal = null;
 
-            // ---------- DOM ----------
-            const $ = id => document.getElementById(id);
-            const bottleListEl = $('bottleList');
-            const statusEl = $('statusArea');
-            const throwBtn = $('throwBtn');
-            const pickBtn = $('pickBtn');
-            const newMessageEl = $('newMessage');
-            const adminPanel = $('adminPanel');
-            const adminContent = $('adminContent');
-            const throwPreview = $('throwPreview');
-            const throwImageInput = $('throwImageInput');
-            const throwRemoveImage = $('throwRemoveImage');
-            const modal = $('imageModal');
-            const modalImg = $('modalImage');
-            const revealModal = $('revealModal');
+            function $(id) { return document.getElementById(id); }
 
-            // ---------- 存储 ----------
+            var bottleListEl = $('bottleList');
+            var statusEl = $('statusArea');
+            var throwBtn = $('throwBtn');
+            var pickBtn = $('pickBtn');
+            var newMessageEl = $('newMessage');
+            var adminPanel = $('adminPanel');
+            var adminContent = $('adminContent');
+            var throwPreview = $('throwPreview');
+            var throwImageInput = $('throwImageInput');
+            var throwRemoveImage = $('throwRemoveImage');
+            var modal = $('imageModal');
+            var modalImg = $('modalImage');
+            var revealModal = $('revealModal');
+
             function loadData() {
                 try {
-                    const raw = localStorage.getItem(STORAGE_KEY);
+                    var raw = localStorage.getItem(STORAGE_KEY);
                     if (raw) {
-                        const parsed = JSON.parse(raw);
+                        var parsed = JSON.parse(raw);
                         bottles = parsed.bottles || [];
                         idCounter = parsed.idCounter || 1000;
                         replyIdCounter = parsed.replyIdCounter || 5000;
@@ -644,23 +695,27 @@
             function saveData() {
                 try {
                     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                        bottles,
-                        idCounter,
-                        replyIdCounter
+                        bottles: bottles,
+                        idCounter: idCounter,
+                        replyIdCounter: replyIdCounter
                     }));
                 } catch (e) {}
             }
 
-            // ---------- 工具 ----------
-            function status(msg, good = true) {
+            function status(msg, good) {
+                good = (good !== undefined) ? good : true;
                 statusEl.innerHTML = msg;
                 statusEl.style.background = good ? '#f2eaf7' : '#ffebee';
                 statusEl.style.color = good ? '#3f2a4e' : '#a13d4a';
             }
 
-            function genId() { return (idCounter++).toString(16) + Date.now().toString(36).slice(-4); }
+            function genId() {
+                return (idCounter++).toString(16) + Date.now().toString(36).slice(-4);
+            }
 
-            function genReplyId() { return 'r' + (replyIdCounter++).toString(16); }
+            function genReplyId() {
+                return 'r' + (replyIdCounter++).toString(16);
+            }
 
             function getCurrentUser() {
                 return {
@@ -677,57 +732,64 @@
             }
 
             function getDisplayName(user, revealedData) {
-                if (!revealedData) return `🫥 匿名 (${user.gender})`;
-                let parts = [];
+                if (!revealedData) return '🫥 匿名 (' + user.gender + ')';
+                var parts = [];
                 if (revealedData.class) parts.push(revealedData.class);
                 if (revealedData.name) parts.push(revealedData.name);
                 if (revealedData.gender) parts.push(revealedData.gender);
-                if (parts.length === 0) return `🫥 匿名 (${user.gender})`;
-                return `📌 ${parts.join(' · ')}`;
+                if (parts.length === 0) return '🫥 匿名 (' + user.gender + ')';
+                return '📌 ' + parts.join(' · ');
             }
 
-            function isA(bottle, user) { return isSamePerson(user, bottle.fromUser); }
+            function isA(bottle, user) {
+                return isSamePerson(user, bottle.fromUser);
+            }
 
             function getMyReplyIds(bottle, user) {
-                const ids = [];
+                var ids = [];
                 if (!bottle.replies) return ids;
-                for (const r of bottle.replies) {
-                    if (isSamePerson(user, r.fromUser)) ids.push(r.id);
+                for (var i = 0; i < bottle.replies.length; i++) {
+                    if (isSamePerson(user, bottle.replies[i].fromUser)) {
+                        ids.push(bottle.replies[i].id);
+                    }
                 }
                 return ids;
             }
 
-            function cloneObj(o) { return JSON.parse(JSON.stringify(o)); }
+            function cloneObj(o) {
+                return JSON.parse(JSON.stringify(o));
+            }
 
             window.openImage = function(data) {
                 modalImg.src = data;
                 modal.classList.add('open');
             };
 
-            function compressImage(file, maxSize = 1.5 * 1024 * 1024) {
-                return new Promise((resolve) => {
+            function compressImage(file, maxSize) {
+                maxSize = maxSize || 1.5 * 1024 * 1024;
+                return new Promise(function(resolve) {
                     if (file.size < maxSize) {
-                        const reader = new FileReader();
-                        reader.onload = e => resolve(e.target.result);
+                        var reader = new FileReader();
+                        reader.onload = function(e) { resolve(e.target.result); };
                         reader.readAsDataURL(file);
                         return;
                     }
-                    const reader = new FileReader();
+                    var reader = new FileReader();
                     reader.onload = function(e) {
-                        const img = new Image();
+                        var img = new Image();
                         img.onload = function() {
-                            const canvas = document.createElement('canvas');
-                            let w = img.width,
+                            var canvas = document.createElement('canvas');
+                            var w = img.width,
                                 h = img.height;
-                            const maxDim = 1200;
+                            var maxDim = 1200;
                             if (w > maxDim || h > maxDim) {
-                                const ratio = Math.min(maxDim / w, maxDim / h);
+                                var ratio = Math.min(maxDim / w, maxDim / h);
                                 w = Math.round(w * ratio);
                                 h = Math.round(h * ratio);
                             }
                             canvas.width = w;
                             canvas.height = h;
-                            const ctx = canvas.getContext('2d');
+                            var ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, w, h);
                             resolve(canvas.toDataURL('image/jpeg', 0.85));
                         };
@@ -737,26 +799,27 @@
                 });
             }
 
-            function renderImage(data, cls = '') {
+            function renderImage(data, cls) {
+                cls = cls || '';
                 if (!data) return '';
-                return `<div class="${cls}" onclick="event.stopPropagation();openImage('${data}')">
-                    <img src="${data}" alt="配图" loading="lazy">
-                </div>`;
+                return '<div class="' + cls + '" onclick="event.stopPropagation();openImage(\'' + data + '\')">' +
+                    '<img src="' + data + '" alt="配图" loading="lazy">' +
+                    '</div>';
             }
 
-            // ---------- 核心操作 ----------
+            // ===== 投掷 =====
             function throwBottle() {
-                const content = newMessageEl.value.trim();
+                var content = newMessageEl.value.trim();
                 if (!content && !throwImageData) {
                     status('✍️ 请写点内容或上传图片', false);
                     return;
                 }
-                const user = getCurrentUser();
+                var user = getCurrentUser();
                 if (!user.className || !user.name || !user.id) {
                     status('⚠️ 请完整填写班级、姓名、学号', false);
                     return;
                 }
-                const bottle = {
+                var bottle = {
                     id: genId(),
                     fromUser: cloneObj(user),
                     content: content || '(图片消息)',
@@ -776,18 +839,33 @@
                 if (adminPanel.classList.contains('open')) renderAdmin();
             }
 
+            // ===== 拾取 =====
             function pickBottle() {
-                if (!bottles.length) { status('🌊 还没有瓶子', false); return; }
-                const user = getCurrentUser();
-                const available = bottles.filter(b => !isSamePerson(user, b.fromUser));
-                if (!available.length) { status('😅 没有别人的瓶子', false); return; }
-                const picked = available[Math.floor(Math.random() * available.length)];
-                const hint = picked.image ? ' 📷' : '';
-                status(`🎯 拾取到瓶子${hint}，请回复`, true);
+                if (!bottles.length) {
+                    status('🌊 还没有瓶子', false);
+                    return;
+                }
+                var user = getCurrentUser();
+                var available = [];
+                for (var i = 0; i < bottles.length; i++) {
+                    if (!isSamePerson(user, bottles[i].fromUser)) {
+                        available.push(bottles[i]);
+                    }
+                }
+                if (!available.length) {
+                    status('😅 没有别人的瓶子', false);
+                    return;
+                }
+                var picked = available[Math.floor(Math.random() * available.length)];
+                var hint = picked.image ? ' 📷' : '';
+                status('🎯 拾取到瓶子' + hint + '，请回复', true);
 
-                const replyMsg = prompt(`📨 你拾取了一个漂流瓶:\n“${picked.content}”\n\n输入你的匿名回复:`);
-                if (replyMsg === null) { status('已取消', false); return; }
-                const img = replyImageData[picked.id] || null;
+                var replyMsg = prompt('📨 你拾取了一个漂流瓶:\n"' + picked.content + '"\n\n输入你的匿名回复:');
+                if (replyMsg === null) {
+                    status('已取消', false);
+                    return;
+                }
+                var img = replyImageData[picked.id] || null;
                 if (replyMsg.trim() === '' && !img) {
                     status('请至少输入文字或选择图片', false);
                     return;
@@ -796,10 +874,20 @@
                 delete replyImageData[picked.id];
             }
 
+            // ===== 回复 =====
             function addReply(bottleId, threadId, content, image) {
-                const bottle = bottles.find(b => b.id === bottleId);
-                if (!bottle) { status('❌ 瓶子不见了', false); return; }
-                const reply = {
+                var bottle = null;
+                for (var i = 0; i < bottles.length; i++) {
+                    if (bottles[i].id === bottleId) {
+                        bottle = bottles[i];
+                        break;
+                    }
+                }
+                if (!bottle) {
+                    status('❌ 瓶子不见了', false);
+                    return;
+                }
+                var reply = {
                     id: genReplyId(),
                     fromUser: cloneObj(getCurrentUser()),
                     content: content,
@@ -812,11 +900,20 @@
                 if (adminPanel.classList.contains('open')) renderAdmin();
             }
 
-            // ---------- 🔓 揭示身份 ----------
+            // ===== 揭晓弹窗 =====
             function showRevealModal(bottleId, role, replyId) {
-                const bottle = bottles.find(b => b.id === bottleId);
-                if (!bottle) { status('❌ 瓶子不见了', false); return; }
-                const user = getCurrentUser();
+                var bottle = null;
+                for (var i = 0; i < bottles.length; i++) {
+                    if (bottles[i].id === bottleId) {
+                        bottle = bottles[i];
+                        break;
+                    }
+                }
+                if (!bottle) {
+                    status('❌ 瓶子不见了', false);
+                    return;
+                }
+                var user = getCurrentUser();
 
                 if (role === 'A') {
                     if (!isSamePerson(user, bottle.fromUser)) {
@@ -828,9 +925,21 @@
                         return;
                     }
                 } else if (role === 'B') {
-                    if (!replyId) { status('❌ 缺少回复ID', false); return; }
-                    const reply = bottle.replies.find(r => r.id === replyId);
-                    if (!reply) { status('❌ 回复不存在', false); return; }
+                    if (!replyId) {
+                        status('❌ 缺少回复ID', false);
+                        return;
+                    }
+                    var reply = null;
+                    for (var j = 0; j < bottle.replies.length; j++) {
+                        if (bottle.replies[j].id === replyId) {
+                            reply = bottle.replies[j];
+                            break;
+                        }
+                    }
+                    if (!reply) {
+                        status('❌ 回复不存在', false);
+                        return;
+                    }
                     if (!isSamePerson(user, reply.fromUser)) {
                         status('⚠️ 这不是你的回复', false);
                         return;
@@ -844,7 +953,7 @@
                     return;
                 }
 
-                pendingReveal = { bottleId, role, replyId, user };
+                pendingReveal = { bottleId: bottleId, role: role, replyId: replyId, user: user };
 
                 $('revealClassValue').textContent = user.className || '未填写';
                 $('revealNameValue').textContent = user.name || '未填写';
@@ -860,9 +969,9 @@
             }
 
             $('revealConfirmBtn').addEventListener('click', function() {
-                const classChecked = $('revealClass').checked;
-                const nameChecked = $('revealName').checked;
-                const genderChecked = $('revealGender').checked;
+                var classChecked = $('revealClass').checked;
+                var nameChecked = $('revealName').checked;
+                var genderChecked = $('revealGender').checked;
 
                 if (!classChecked && !nameChecked && !genderChecked) {
                     $('revealError').style.display = 'block';
@@ -871,11 +980,24 @@
                 $('revealError').style.display = 'none';
 
                 if (!pendingReveal) return;
-                const { bottleId, role, replyId, user } = pendingReveal;
-                const bottle = bottles.find(b => b.id === bottleId);
-                if (!bottle) { status('❌ 瓶子消失了', false); return; }
+                var bottleId = pendingReveal.bottleId;
+                var role = pendingReveal.role;
+                var replyId = pendingReveal.replyId;
+                var user = pendingReveal.user;
 
-                const revealedInfo = {
+                var bottle = null;
+                for (var i = 0; i < bottles.length; i++) {
+                    if (bottles[i].id === bottleId) {
+                        bottle = bottles[i];
+                        break;
+                    }
+                }
+                if (!bottle) {
+                    status('❌ 瓶子消失了', false);
+                    return;
+                }
+
+                var revealedInfo = {
                     class: classChecked ? user.className : null,
                     name: nameChecked ? user.name : null,
                     gender: genderChecked ? user.gender : null
@@ -884,19 +1006,19 @@
                 if (role === 'A') {
                     bottle.revealA = true;
                     bottle.revealAData = revealedInfo;
-                    const parts = [];
+                    var parts = [];
                     if (revealedInfo.class) parts.push('班级');
                     if (revealedInfo.name) parts.push('姓名');
                     if (revealedInfo.gender) parts.push('性别');
-                    status(`✅ 你已揭晓：${parts.join('、')}`, true);
+                    status('✅ 你已揭晓：' + parts.join('、'), true);
                 } else if (role === 'B') {
                     if (!bottle.revealMap) bottle.revealMap = {};
                     bottle.revealMap[replyId] = revealedInfo;
-                    const parts = [];
-                    if (revealedInfo.class) parts.push('班级');
-                    if (revealedInfo.name) parts.push('姓名');
-                    if (revealedInfo.gender) parts.push('性别');
-                    status(`✅ 你已揭晓：${parts.join('、')}`, true);
+                    var parts2 = [];
+                    if (revealedInfo.class) parts2.push('班级');
+                    if (revealedInfo.name) parts2.push('姓名');
+                    if (revealedInfo.gender) parts2.push('性别');
+                    status('✅ 你已揭晓：' + parts2.join('、'), true);
                 }
 
                 revealModal.classList.remove('open');
@@ -919,117 +1041,135 @@
                 }
             });
 
-            // ---------- 渲染 ----------
+            // ===== 渲染 =====
             function render() {
                 saveData();
                 if (!bottles.length) {
-                    bottleListEl.innerHTML = `<div class="empty-state">🪸 还没有漂流瓶，来投一个吧</div>`;
+                    bottleListEl.innerHTML = '<div class="empty-state">🪸 还没有漂流瓶，来投一个吧</div>';
                     return;
                 }
-                const user = getCurrentUser();
-                let html = '';
-                const sorted = [...bottles].reverse();
+                var user = getCurrentUser();
+                var html = '';
+                var sorted = bottles.slice().reverse();
 
-                for (const bottle of sorted) {
-                    const meA = isA(bottle, user);
-                    let fromDisplay = getDisplayName(bottle.fromUser, bottle.revealAData);
+                for (var i = 0; i < sorted.length; i++) {
+                    var bottle = sorted[i];
+                    var meA = isA(bottle, user);
+                    var fromDisplay = getDisplayName(bottle.fromUser, bottle.revealAData);
                     if (meA) fromDisplay += ' 👈 是你';
 
-                    html += `<div class="bubble">`;
-                    html +=
-                        `<div class="meta"><span>${fromDisplay}</span><span class="badge">#${bottle.id.slice(-4)}</span></div>`;
-                    html += `<div class="content">💬 ${bottle.content}</div>`;
+                    html += '<div class="bubble">';
+                    html += '<div class="meta"><span>' + fromDisplay + '</span><span class="badge">#' + bottle.id.slice(-4) +
+                        '</span></div>';
+                    html += '<div class="content">💬 ' + bottle.content + '</div>';
                     if (bottle.image) html += renderImage(bottle.image, 'bubble-image');
 
                     if (bottle.replies && bottle.replies.length) {
-                        let visible = [];
+                        var visible = [];
                         if (meA) {
                             visible = bottle.replies;
                         } else {
-                            const myIds = getMyReplyIds(bottle, user);
-                            const myReplies = bottle.replies.filter(r => myIds.includes(r.id));
-                            const aReplies = bottle.replies.filter(r =>
-                                isSamePerson(r.fromUser, bottle.fromUser) && myIds.includes(r.threadId)
-                            );
-                            const all = [...myReplies, ...aReplies];
-                            const seen = new Set();
-                            visible = all.filter(r => { if (seen.has(r.id)) return false;
-                                seen.add(r.id); return true; });
-                            visible.sort((a, b) => a.id.localeCompare(b.id));
+                            var myIds = getMyReplyIds(bottle, user);
+                            var myReplies = [];
+                            var aReplies = [];
+                            for (var j = 0; j < bottle.replies.length; j++) {
+                                var r = bottle.replies[j];
+                                if (myIds.indexOf(r.id) !== -1) {
+                                    myReplies.push(r);
+                                }
+                                if (isSamePerson(r.fromUser, bottle.fromUser) && myIds.indexOf(r.threadId) !== -1) {
+                                    aReplies.push(r);
+                                }
+                            }
+                            var all = myReplies.concat(aReplies);
+                            var seen = {};
+                            visible = [];
+                            for (var k = 0; k < all.length; k++) {
+                                if (!seen[all[k].id]) {
+                                    seen[all[k].id] = true;
+                                    visible.push(all[k]);
+                                }
+                            }
+                            visible.sort(function(a, b) { return a.id.localeCompare(b.id); });
                         }
 
                         if (!visible.length) {
-                            html += `<div style="margin-top:6px;font-size:12px;color:#6d5380;">⏳ 尚无可见回复</div>`;
+                            html += '<div style="margin-top:6px;font-size:12px;color:#6d5380;">⏳ 尚无可见回复</div>';
                         } else {
-                            for (const reply of visible) {
-                                const isMine = isSamePerson(user, reply.fromUser);
-                                const isReplyA = isSamePerson(reply.fromUser, bottle.fromUser);
-                                let revealedData = null;
+                            for (var m = 0; m < visible.length; m++) {
+                                var reply = visible[m];
+                                var isMine = isSamePerson(user, reply.fromUser);
+                                var isReplyA = isSamePerson(reply.fromUser, bottle.fromUser);
+                                var revealedData = null;
                                 if (isReplyA) revealedData = bottle.revealAData;
-                                else revealedData = (bottle.revealMap && bottle.revealMap[reply.id]) || null;
-                                const dname = getDisplayName(reply.fromUser, revealedData);
-                                const cls = isMine ? 'reply-item mine' : 'reply-item';
-                                html += `<div class="${cls}">`;
-                                html +=
-                                    `<div class="rmeta"><span>${dname}</span><span class="tag">#${reply.id.slice(-4)}</span></div>`;
-                                html += `<div class="rcontent">${reply.content}</div>`;
+                                else if (bottle.revealMap && bottle.revealMap[reply.id]) revealedData = bottle.revealMap[
+                                reply.id];
+                                var dname = getDisplayName(reply.fromUser, revealedData);
+                                var cls = isMine ? 'reply-item mine' : 'reply-item';
+                                html += '<div class="' + cls + '">';
+                                html += '<div class="rmeta"><span>' + dname + '</span><span class="tag">#' + reply.id
+                                    .slice(-4) + '</span></div>';
+                                html += '<div class="rcontent">' + reply.content + '</div>';
                                 if (reply.image) html += renderImage(reply.image, 'reply-image');
 
                                 if (isMine && !isReplyA) {
-                                    const isRevealed = bottle.revealMap && bottle.revealMap[reply.id];
+                                    var isRevealed = bottle.revealMap && bottle.revealMap[reply.id];
                                     if (!isRevealed) {
-                                        html += `<div style="margin-top:6px;">
-                                            <button class="btn btn-success btn-sm reveal-btn" data-id="${bottle.id}" data-replyid="${reply.id}" data-role="B">🔓 选择揭晓</button>
-                                        </div>`;
+                                        html += '<div style="margin-top:6px;">' +
+                                            '<button class="btn btn-success btn-sm reveal-btn" data-id="' + bottle.id +
+                                            '" data-replyid="' + reply.id + '" data-role="B">🔓 选择揭晓</button>' +
+                                            '</div>';
                                     } else {
-                                        const rd = bottle.revealMap[reply.id];
-                                        let parts = [];
-                                        if (rd.class) parts.push('班级');
-                                        if (rd.name) parts.push('姓名');
-                                        if (rd.gender) parts.push('性别');
-                                        html +=
-                                            `<div style="margin-top:6px;"><span class="hidden-info">✅ 已揭晓：${parts.join('、')}</span></div>`;
+                                        var rd = bottle.revealMap[reply.id];
+                                        var parts3 = [];
+                                        if (rd.class) parts3.push('班级');
+                                        if (rd.name) parts3.push('姓名');
+                                        if (rd.gender) parts3.push('性别');
+                                        html += '<div style="margin-top:6px;"><span class="hidden-info">✅ 已揭晓：' +
+                                            parts3.join('、') + '</span></div>';
                                     }
                                 }
 
-                                html += `</div>`;
+                                html += '</div>';
                             }
                         }
                     } else {
-                        html += `<div style="margin-top:6px;font-size:12px;color:#6d5380;">⏳ 暂无回复</div>`;
+                        html += '<div style="margin-top:6px;font-size:12px;color:#6d5380;">⏳ 暂无回复</div>';
                     }
 
-                    html += `<div class="actions">`;
-                    html += `<button class="btn btn-ghost btn-sm reply-btn" data-id="${bottle.id}">✍️ 回复</button>`;
+                    html += '<div class="actions">';
+                    html += '<button class="btn btn-ghost btn-sm reply-btn" data-id="' + bottle.id + '">✍️ 回复</button>';
                     if (bottle.replies && bottle.replies.length) {
-                        html +=
-                            `<button class="btn btn-ghost btn-sm reply-thread-btn" data-id="${bottle.id}">💬 回复某条</button>`;
+                        html += '<button class="btn btn-ghost btn-sm reply-thread-btn" data-id="' + bottle.id +
+                            '">💬 回复某条</button>';
                     }
 
                     if (meA && !bottle.revealA) {
-                        html +=
-                            `<button class="btn btn-success btn-sm reveal-btn" data-id="${bottle.id}" data-role="A">🔓 选择揭晓</button>`;
+                        html += '<button class="btn btn-success btn-sm reveal-btn" data-id="' + bottle.id +
+                            '" data-role="A">🔓 选择揭晓</button>';
                     } else if (meA && bottle.revealA) {
-                        const rd = bottle.revealAData;
-                        let parts = [];
-                        if (rd && rd.class) parts.push('班级');
-                        if (rd && rd.name) parts.push('姓名');
-                        if (rd && rd.gender) parts.push('性别');
-                        html += `<span class="hidden-info">✅ 已揭晓：${parts.join('、')}</span>`;
+                        var rd2 = bottle.revealAData;
+                        var parts4 = [];
+                        if (rd2 && rd2.class) parts4.push('班级');
+                        if (rd2 && rd2.name) parts4.push('姓名');
+                        if (rd2 && rd2.gender) parts4.push('性别');
+                        html += '<span class="hidden-info">✅ 已揭晓：' + parts4.join('、') + '</span>';
                     }
 
-                    html += `</div>`;
-                    html += `</div>`;
+                    html += '</div>';
+                    html += '</div>';
                 }
                 bottleListEl.innerHTML = html;
 
-                document.querySelectorAll('.reply-btn').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
+                // 事件绑定
+                var replyBtns = document.querySelectorAll('.reply-btn');
+                for (var n = 0; n < replyBtns.length; n++) {
+                    replyBtns[n].addEventListener('click', function(e) {
                         e.stopPropagation();
-                        const bottleId = this.dataset.id;
-                        const content = prompt('💬 输入你的回复内容 (可配图):');
+                        var bottleId = this.dataset.id;
+                        var content = prompt('💬 输入你的回复内容 (可配图):');
                         if (content === null) return;
-                        const img = replyImageData[bottleId] || null;
+                        var img = replyImageData[bottleId] || null;
                         if (content.trim() === '' && !img) {
                             status('请至少输入文字或选择图片', false);
                             return;
@@ -1037,154 +1177,190 @@
                         addReply(bottleId, null, content.trim() || '(图片)', img);
                         delete replyImageData[bottleId];
                     });
-                });
+                }
 
-                document.querySelectorAll('.reply-thread-btn').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
+                var threadBtns = document.querySelectorAll('.reply-thread-btn');
+                for (var o = 0; o < threadBtns.length; o++) {
+                    threadBtns[o].addEventListener('click', function(e) {
                         e.stopPropagation();
-                        const bottleId = this.dataset.id;
-                        const bottle = bottles.find(b => b.id === bottleId);
+                        var bottleId = this.dataset.id;
+                        var bottle = null;
+                        for (var p = 0; p < bottles.length; p++) {
+                            if (bottles[p].id === bottleId) {
+                                bottle = bottles[p];
+                                break;
+                            }
+                        }
                         if (!bottle || !bottle.replies || !bottle.replies.length) {
                             status('没有可回复的条目', false);
                             return;
                         }
-                        const user = getCurrentUser();
-                        let visible = [];
-                        if (isA(bottle, user)) {
-                            visible = bottle.replies;
+                        var user2 = getCurrentUser();
+                        var visible2 = [];
+                        if (isA(bottle, user2)) {
+                            visible2 = bottle.replies;
                         } else {
-                            const myIds = getMyReplyIds(bottle, user);
-                            visible = bottle.replies.filter(r => myIds.includes(r.id) || isSamePerson(r.fromUser, bottle
-                                .fromUser));
+                            var myIds2 = getMyReplyIds(bottle, user2);
+                            for (var q = 0; q < bottle.replies.length; q++) {
+                                var r2 = bottle.replies[q];
+                                if (myIds2.indexOf(r2.id) !== -1 || isSamePerson(r2.fromUser, bottle.fromUser)) {
+                                    visible2.push(r2);
+                                }
+                            }
                         }
-                        if (!visible.length) {
+                        if (!visible2.length) {
                             status('没有你可回复的条目', false);
                             return;
                         }
-                        let list = visible.map((r, idx) =>
-                            `${idx+1}. ${r.content.substring(0,20)}... (${r.fromUser.gender})`
-                        ).join('\n');
-                        const choice = prompt(`选择要回复的条目 (输入编号 1-${visible.length}):\n${list}`);
+                        var list = '';
+                        for (var r = 0; r < visible2.length; r++) {
+                            list += (r + 1) + '. ' + visible2[r].content.substring(0, 20) + '... (' + visible2[r]
+                            .fromUser.gender + ')\n';
+                        }
+                        var choice = prompt('选择要回复的条目 (输入编号 1-' + visible2.length + '):\n' + list);
                         if (choice) {
-                            const idx = parseInt(choice) - 1;
-                            if (idx >= 0 && idx < visible.length) {
-                                const target = visible[idx];
-                                const content =
-                                    prompt(`💬 回复: "${target.content.substring(0,30)}..."\n输入你的回复:`);
-                                if (content === null) return;
-                                const img = replyImageData[bottleId] || null;
-                                if (content.trim() === '' && !img) {
+                            var idx = parseInt(choice) - 1;
+                            if (idx >= 0 && idx < visible2.length) {
+                                var target = visible2[idx];
+                                var content2 = prompt('💬 回复: "' + target.content.substring(0, 30) +
+                                    '..."\n输入你的回复:');
+                                if (content2 === null) return;
+                                var img2 = replyImageData[bottleId] || null;
+                                if (content2.trim() === '' && !img2) {
                                     status('请至少输入文字或选择图片', false);
                                     return;
                                 }
-                                addReply(bottleId, target.id, content.trim() || '(图片)', img);
+                                addReply(bottleId, target.id, content2.trim() || '(图片)', img2);
                                 delete replyImageData[bottleId];
                             } else {
                                 status('无效编号', false);
                             }
                         }
                     });
-                });
+                }
 
-                document.querySelectorAll('.reveal-btn').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
+                var revealBtns = document.querySelectorAll('.reveal-btn');
+                for (var s = 0; s < revealBtns.length; s++) {
+                    revealBtns[s].addEventListener('click', function(e) {
                         e.stopPropagation();
-                        const bottleId = this.dataset.id;
-                        const role = this.dataset.role;
-                        const replyId = this.dataset.replyid || null;
+                        var bottleId = this.dataset.id;
+                        var role = this.dataset.role;
+                        var replyId = this.dataset.replyid || null;
                         showRevealModal(bottleId, role, replyId);
                     });
-                });
+                }
             }
 
-            // ---------- 后台 ----------
+            // ===== 后台 =====
             function renderAdmin() {
                 if (!bottles.length) {
-                    adminContent.innerHTML = `<p style="color:#6a4f7a;">📭 暂无数据</p>`;
+                    adminContent.innerHTML = '<p style="color:#6a4f7a;">📭 暂无数据</p>';
                     return;
                 }
 
-                const userMap = new Map();
-                for (const b of bottles) {
-                    const key = b.fromUser.id + '|' + b.fromUser.className;
+                var userMap = new Map();
+                for (var i = 0; i < bottles.length; i++) {
+                    var b = bottles[i];
+                    var key = b.fromUser.id + '|' + b.fromUser.className;
                     if (!userMap.has(key)) {
-                        userMap.set(key, { ...b.fromUser, role: '投递者', bottleCount: 1 });
+                        userMap.set(key, {
+                            className: b.fromUser.className,
+                            name: b.fromUser.name,
+                            id: b.fromUser.id,
+                            gender: b.fromUser.gender,
+                            role: '投递者',
+                            bottleCount: 1
+                        });
                     } else {
-                        userMap.get(key).bottleCount += 1;
+                        var existing = userMap.get(key);
+                        existing.bottleCount += 1;
                     }
-                    for (const r of (b.replies || [])) {
-                        const rkey = r.fromUser.id + '|' + r.fromUser.className;
+                    for (var j = 0; j < (b.replies || []).length; j++) {
+                        var r = b.replies[j];
+                        var rkey = r.fromUser.id + '|' + r.fromUser.className;
                         if (!userMap.has(rkey)) {
-                            userMap.set(rkey, { ...r.fromUser, role: '回复者', replyCount: 1 });
+                            userMap.set(rkey, {
+                                className: r.fromUser.className,
+                                name: r.fromUser.name,
+                                id: r.fromUser.id,
+                                gender: r.fromUser.gender,
+                                role: '回复者',
+                                replyCount: 1
+                            });
                         } else {
-                            const existing = userMap.get(rkey);
-                            existing.replyCount = (existing.replyCount || 0) + 1;
-                            if (existing.role !== '投递者' && existing.role !== '投递者+回复者') {
-                                existing.role = '回复者';
+                            var existing2 = userMap.get(rkey);
+                            existing2.replyCount = (existing2.replyCount || 0) + 1;
+                            if (existing2.role !== '投递者' && existing2.role !== '投递者+回复者') {
+                                existing2.role = '回复者';
                             }
                         }
                     }
                 }
 
-                let html = '';
-                html += `<h3 style="font-size:15px;color:#2a1a38;margin-bottom:8px;">👥 所有参与用户 (${userMap.size}人)</h3>`;
-                html += `<div class="admin-user-grid">`;
-                for (const [key, user] of userMap) {
-                    const roleTag = user.role === '投递者' ? '📤' : user.role === '回复者' ? '📥' : '📤📥';
-                    html += `<div class="admin-user-card">`;
-                    html += `<div class="name">${user.name}</div>`;
-                    html += `<div class="detail">${user.className} · ${user.gender}</div>`;
-                    html += `<div class="detail" style="font-size:11px;color:#7e6193;">学号: ${user.id} · ${roleTag}</div>`;
-                    html += `</div>`;
+                var html = '';
+                html += '<h3 style="font-size:15px;color:#2a1a38;margin-bottom:8px;">👥 所有参与用户 (' + userMap.size + '人)</h3>';
+                html += '<div class="admin-user-grid">';
+                var userArray = Array.from(userMap.values());
+                for (var k = 0; k < userArray.length; k++) {
+                    var u = userArray[k];
+                    var roleTag = u.role === '投递者' ? '📤' : u.role === '回复者' ? '📥' : '📤📥';
+                    html += '<div class="admin-user-card">';
+                    html += '<div class="name">' + u.name + '</div>';
+                    html += '<div class="detail">' + u.className + ' · ' + u.gender + '</div>';
+                    html += '<div class="detail" style="font-size:11px;color:#7e6193;">学号: ' + u.id + ' · ' + roleTag +
+                        '</div>';
+                    html += '</div>';
                 }
-                html += `</div>`;
+                html += '</div>';
 
-                html += `<hr><h3 style="font-size:15px;color:#2a1a38;margin:12px 0 8px;">📦 所有瓶子及回复</h3>`;
-                for (const b of bottles) {
-                    html += `<div class="admin-bottle-item">`;
-                    html +=
-                        `<div class="admin-meta">📌 <strong>${b.fromUser.name}</strong> (${b.fromUser.className} · ${b.fromUser.gender} · 学号:${b.fromUser.id})</div>`;
-                    html += `<div style="font-size:15px;margin-bottom:4px;">💬 ${b.content}</div>`;
-                    if (b.image) {
-                        html += `<div style="font-size:12px;color:#7e6193;margin-bottom:4px;">📷 有配图</div>`;
+                html += '<hr><h3 style="font-size:15px;color:#2a1a38;margin:12px 0 8px;">📦 所有瓶子及回复</h3>';
+                for (var m = 0; m < bottles.length; m++) {
+                    var b2 = bottles[m];
+                    html += '<div class="admin-bottle-item">';
+                    html += '<div class="admin-meta">📌 <strong>' + b2.fromUser.name + '</strong> (' + b2.fromUser
+                        .className + ' · ' + b2.fromUser.gender + ' · 学号:' + b2.fromUser.id + ')</div>';
+                    html += '<div style="font-size:15px;margin-bottom:4px;">💬 ' + b2.content + '</div>';
+                    if (b2.image) {
+                        html += '<div style="font-size:12px;color:#7e6193;margin-bottom:4px;">📷 有配图</div>';
                     }
-                    if (b.replies && b.replies.length) {
-                        for (const r of b.replies) {
-                            const isA = isSamePerson(r.fromUser, b.fromUser);
-                            const label = isA ? '↩️ [投递者]' : '↪️ [回复者]';
-                            html +=
-                                `<div class="admin-reply">${label} <strong>${r.fromUser.name}</strong> (${r.fromUser.className} · ${r.fromUser.gender} · 学号:${r.fromUser.id})<br>“${r.content}”`;
-                            if (r.image) html += ` <span style="color:#7e6193;">📷</span>`;
-                            html += `</div>`;
+                    if (b2.replies && b2.replies.length) {
+                        for (var n2 = 0; n2 < b2.replies.length; n2++) {
+                            var r2 = b2.replies[n2];
+                            var isA2 = isSamePerson(r2.fromUser, b2.fromUser);
+                            var label = isA2 ? '↩️ [投递者]' : '↪️ [回复者]';
+                            html += '<div class="admin-reply">' + label + ' <strong>' + r2.fromUser.name +
+                                '</strong> (' + r2.fromUser.className + ' · ' + r2.fromUser.gender + ' · 学号:' + r2
+                                .fromUser.id + ')<br>“' + r2.content + '”';
+                            if (r2.image) html += ' <span style="color:#7e6193;">📷</span>';
+                            html += '</div>';
                         }
                     } else {
-                        html += `<div style="font-size:13px;color:#8d74a0;">暂无回复</div>`;
+                        html += '<div style="font-size:13px;color:#8d74a0;">暂无回复</div>';
                     }
-                    html += `</div>`;
+                    html += '</div>';
                 }
 
                 adminContent.innerHTML = html;
             }
 
-            // ---------- 图片上传 ----------
-            throwImageInput.addEventListener('change', async function(e) {
-                const file = e.target.files[0];
+            // ===== 图片上传 =====
+            throwImageInput.addEventListener('change', function(e) {
+                var file = e.target.files[0];
                 if (!file) return;
                 if (file.size > 5 * 1024 * 1024) {
                     status('⚠️ 图片超过 5MB，请压缩后上传', false);
                     this.value = '';
                     return;
                 }
-                try {
-                    const dataUrl = await compressImage(file);
+                compressImage(file).then(function(dataUrl) {
                     throwImageData = dataUrl;
-                    throwPreview.innerHTML =
-                        `<img src="${dataUrl}" alt="预览" style="width:100%;height:100%;object-fit:cover;">`;
+                    throwPreview.innerHTML = '<img src="' + dataUrl +
+                        '" alt="预览" style="width:100%;height:100%;object-fit:cover;">';
                     throwRemoveImage.style.display = 'inline-block';
                     status('✅ 图片已添加', true);
-                } catch (err) {
+                })['catch'](function(err) {
                     status('❌ 图片处理失败', false);
-                }
+                });
                 this.value = '';
             });
 
@@ -1195,15 +1371,18 @@
                 status('已移除图片', true);
             });
 
-            // ---------- 后台按钮 ----------
+            // ===== 后台按钮 =====
             $('adminToggleBtn').addEventListener('click', function() {
                 if (adminPanel.classList.contains('open')) {
                     adminPanel.classList.remove('open');
                     this.textContent = '🔐 后台';
                     return;
                 }
-                const pwd = prompt('🔐 请输入后台密码:');
-                if (pwd === null) { status('已取消', true); return; }
+                var pwd = prompt('🔐 请输入后台密码:');
+                if (pwd === null) {
+                    status('已取消', true);
+                    return;
+                }
                 if (pwd !== ADMIN_PASSWORD) {
                     status('❌ 密码错误', false);
                     return;
@@ -1235,22 +1414,29 @@
                 }
             });
 
-            // 保存用户信息
-            ['userClass', 'userName', 'userId', 'userGender'].forEach(id => {
-                const el = $(id);
-                const saved = localStorage.getItem('user_' + id);
-                if (saved) el.value = saved;
-                el.addEventListener('change', function() {
-                    localStorage.setItem('user_' + id, this.value);
-                });
-            });
+            // ===== 保存用户信息 =====
+            var userFields = ['userClass', 'userName', 'userId', 'userGender'];
+            for (var f = 0; f < userFields.length; f++) {
+                (function(fieldId) {
+                    var el = $(fieldId);
+                    var saved = localStorage.getItem('user_' + fieldId);
+                    if (saved) el.value = saved;
+                    el.addEventListener('change', function() {
+                        localStorage.setItem('user_' + fieldId, this.value);
+                    });
+                })(userFields[f]);
+            }
 
-            // ---------- 初始化 ----------
+            // ===== 按钮事件 =====
+            throwBtn.addEventListener('click', throwBottle);
+            pickBtn.addEventListener('click', pickBottle);
+
+            // ===== 初始化 =====
             loadData();
 
             if (!bottles.length) {
-                const demoUser = { className: '高二(7)班', name: '陈知微', id: '20240518', gender: '♀ 女生' };
-                const b1 = {
+                var demoUser = { className: '高二(7)班', name: '陈知微', id: '20240518', gender: '♀ 女生' };
+                var b1 = {
                     id: genId(),
                     fromUser: cloneObj(demoUser),
                     content: '今天在操场看到一只橘猫，它好像认识我 🐱',
@@ -1260,12 +1446,27 @@
                     revealAData: null,
                     revealMap: {}
                 };
-                const r1 = { id: genReplyId(), fromUser: { className: '高一(3)班', name: '陆远', id: '20240901',
-                        gender: '♂ 男生' }, content: '我也看到了！它特别亲人，我摸过它。', image: null, threadId: null };
-                const r2 = { id: genReplyId(), fromUser: { className: '高三(5)班', name: '苏雨桐', id: '20240228',
-                        gender: '♀ 女生' }, content: '那只猫叫小橘，经常在食堂附近出没。', image: null, threadId: null };
-                const r1a = { id: genReplyId(), fromUser: cloneObj(demoUser), content: '真的吗？那我下次也去摸它！',
-                    image: null, threadId: r1.id };
+                var r1 = {
+                    id: genReplyId(),
+                    fromUser: { className: '高一(3)班', name: '陆远', id: '20240901', gender: '♂ 男生' },
+                    content: '我也看到了！它特别亲人，我摸过它。',
+                    image: null,
+                    threadId: null
+                };
+                var r2 = {
+                    id: genReplyId(),
+                    fromUser: { className: '高三(5)班', name: '苏雨桐', id: '20240228', gender: '♀ 女生' },
+                    content: '那只猫叫小橘，经常在食堂附近出没。',
+                    image: null,
+                    threadId: null
+                };
+                var r1a = {
+                    id: genReplyId(),
+                    fromUser: cloneObj(demoUser),
+                    content: '真的吗？那我下次也去摸它！',
+                    image: null,
+                    threadId: r1.id
+                };
                 b1.replies = [r1, r2, r1a];
                 bottles = [b1];
                 saveData();
