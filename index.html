@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🍾 树洞漂流瓶</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
             background: linear-gradient(145deg, #f0ebf5 0%, #ddd6e8 100%);
@@ -19,13 +15,12 @@
         .app {
             max-width: 720px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255,255,255,0.7);
             backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
             border-radius: 32px 32px 24px 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
             padding: 20px 16px 24px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255,255,255,0.6);
         }
         h1 {
             display: flex;
@@ -41,10 +36,10 @@
             font-weight: 400;
             color: #6a4f7a;
             margin-left: auto;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255,255,255,0.5);
             padding: 3px 14px;
             border-radius: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255,255,255,0.8);
         }
         .sub {
             color: #4d365c;
@@ -52,16 +47,16 @@
             margin-bottom: 16px;
             padding: 6px 14px;
             border-left: 3px solid #b38bc9;
-            background: rgba(255, 240, 245, 0.2);
+            background: rgba(255,240,245,0.2);
             border-radius: 0 12px 12px 0;
         }
         .card {
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255,255,255,0.5);
             backdrop-filter: blur(4px);
             border-radius: 20px;
             padding: 16px 14px;
             margin-bottom: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255,255,255,0.7);
         }
         .row {
             display: flex;
@@ -75,24 +70,21 @@
             font-weight: 600;
             color: #3f2a4e;
         }
-        .row input,
-        .row textarea,
-        .row select {
+        .row input, .row textarea, .row select {
             flex: 1;
             min-width: 90px;
             padding: 10px 14px;
             border: 1px solid #d9c8e3;
             border-radius: 40px;
             font-size: 14px;
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255,255,255,0.7);
             transition: 0.2s;
             outline: none;
             font-family: inherit;
         }
-        .row input:focus,
-        .row textarea:focus {
+        .row input:focus, .row textarea:focus {
             border-color: #a67bbd;
-            box-shadow: 0 0 0 3px rgba(166, 123, 189, 0.15);
+            box-shadow: 0 0 0 3px rgba(166,123,189,0.15);
             background: white;
         }
         .row textarea {
@@ -100,10 +92,7 @@
             resize: vertical;
             min-height: 56px;
         }
-        .row .half {
-            flex: 1 1 calc(50% - 8px);
-            min-width: 100px;
-        }
+        .row .half { flex: 1 1 calc(50% - 8px); min-width: 100px; }
         .btn-group {
             display: flex;
             flex-wrap: wrap;
@@ -123,21 +112,17 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255,255,255,0.4);
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
-        .btn:active {
-            transform: scale(0.96);
-        }
+        .btn:active { transform: scale(0.96); }
         .btn-primary {
             background: #7d5b96;
             color: white;
-            box-shadow: 0 4px 12px rgba(125, 91, 150, 0.25);
+            box-shadow: 0 4px 12px rgba(125,91,150,0.25);
         }
-        .btn-primary:active {
-            background: #684a80;
-        }
+        .btn-primary:active { background: #684a80; }
         .btn-outline {
             background: transparent;
             border: 1.5px solid #7d5b96;
@@ -146,16 +131,13 @@
         .btn-success {
             background: #2f7a5c;
             color: white;
-            box-shadow: 0 4px 12px rgba(47, 122, 92, 0.2);
+            box-shadow: 0 4px 12px rgba(47,122,92,0.2);
         }
         .btn-ghost {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255,255,255,0.3);
             border: 1px solid #c6b0d4;
         }
-        .btn-sm {
-            padding: 5px 14px;
-            font-size: 12px;
-        }
+        .btn-sm { padding: 5px 14px; font-size: 12px; }
         .status-tip {
             background: #f2eaf7;
             padding: 10px 16px;
@@ -169,19 +151,15 @@
             align-items: center;
             justify-content: center;
         }
-        .bottle-list {
-            margin-top: 14px;
-            border-top: 2px dashed #d3bfdf;
-            padding-top: 14px;
-        }
+        .bottle-list { margin-top: 14px; border-top: 2px dashed #d3bfdf; padding-top: 14px; }
         .bubble {
-            background: rgba(255, 255, 255, 0.75);
+            background: rgba(255,255,255,0.75);
             backdrop-filter: blur(4px);
             border-radius: 18px 18px 18px 6px;
             padding: 14px 16px;
             margin-bottom: 14px;
             border-left: 4px solid #b38bc9;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
         .bubble .meta {
             display: flex;
@@ -205,7 +183,7 @@
             overflow: hidden;
             max-width: 100%;
             cursor: pointer;
-            border: 1px solid rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0,0,0,0.06);
         }
         .bubble .bubble-image img {
             width: 100%;
@@ -215,7 +193,7 @@
             background: #f5f0f8;
         }
         .bubble .reply-item {
-            background: rgba(240, 248, 245, 0.6);
+            background: rgba(240,248,245,0.6);
             border-radius: 14px 14px 14px 4px;
             padding: 10px 12px;
             margin-top: 8px;
@@ -223,7 +201,7 @@
             border-left: 3px solid #4f8a7a;
         }
         .bubble .reply-item.mine {
-            background: rgba(235, 225, 245, 0.6);
+            background: rgba(235,225,245,0.6);
             border-left-color: #9b7bb3;
         }
         .bubble .reply-item .rmeta {
@@ -234,10 +212,7 @@
             margin-bottom: 2px;
             font-weight: 500;
         }
-        .bubble .reply-item .rcontent {
-            font-size: 14px;
-            line-height: 1.4;
-        }
+        .bubble .reply-item .rcontent { font-size: 14px; line-height: 1.4; }
         .bubble .reply-item .reply-image {
             margin-top: 6px;
             border-radius: 10px;
@@ -288,16 +263,14 @@
             font-size: 14px;
         }
         .admin-panel {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255,255,255,0.6);
             border-radius: 20px;
             padding: 16px;
             margin-top: 16px;
             border: 2px solid #b38bc9;
             display: none;
         }
-        .admin-panel.open {
-            display: block;
-        }
+        .admin-panel.open { display: block; }
         .admin-panel h2 {
             font-size: 17px;
             color: #2a1a38;
@@ -322,22 +295,16 @@
             margin-bottom: 12px;
         }
         .admin-user-card {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255,255,255,0.7);
             border-radius: 14px;
             padding: 10px 12px;
             border: 1px solid #d9c8e3;
             font-size: 13px;
         }
-        .admin-user-card .name {
-            font-weight: 600;
-            color: #2a1a38;
-        }
-        .admin-user-card .detail {
-            font-size: 11px;
-            color: #584065;
-        }
+        .admin-user-card .name { font-weight: 600; color: #2a1a38; }
+        .admin-user-card .detail { font-size: 11px; color: #584065; }
         .admin-bottle-item {
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255,255,255,0.5);
             border-radius: 14px;
             padding: 12px;
             margin-bottom: 10px;
@@ -351,7 +318,7 @@
         .admin-bottle-item .admin-reply {
             font-size: 12px;
             color: #3f2a4e;
-            background: rgba(240, 248, 245, 0.5);
+            background: rgba(240,248,245,0.5);
             border-radius: 10px;
             padding: 6px 10px;
             margin-top: 4px;
@@ -386,7 +353,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0,0,0,0.85);
             display: none;
             align-items: center;
             justify-content: center;
@@ -394,9 +361,7 @@
             padding: 16px;
             cursor: pointer;
         }
-        .image-modal.open {
-            display: flex;
-        }
+        .image-modal.open { display: flex; }
         .image-modal img {
             max-width: 100%;
             max-height: 90vh;
@@ -417,38 +382,27 @@
         }
         .reveal-modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 99999;
             padding: 20px;
         }
-        .reveal-modal-overlay.open {
-            display: flex;
-        }
+        .reveal-modal-overlay.open { display: flex; }
         .reveal-modal {
             background: white;
             border-radius: 24px;
             padding: 28px 24px 20px;
             max-width: 380px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             animation: fadeIn 0.2s ease;
         }
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
         .reveal-modal h3 {
             font-size: 18px;
@@ -475,9 +429,7 @@
             cursor: pointer;
             transition: 0.15s;
         }
-        .reveal-option:active {
-            background: #f5f0f8;
-        }
+        .reveal-option:active { background: #f5f0f8; }
         .reveal-option input[type="checkbox"] {
             width: 20px;
             height: 20px;
@@ -511,17 +463,13 @@
             color: #4d365c;
             border: none;
         }
-        .reveal-modal .btn-row .btn-cancel:active {
-            background: #e0d4ea;
-        }
+        .reveal-modal .btn-row .btn-cancel:active { background: #e0d4ea; }
         .reveal-modal .btn-row .btn-confirm {
             background: #7d5b96;
             color: white;
             border: none;
         }
-        .reveal-modal .btn-row .btn-confirm:active {
-            background: #684a80;
-        }
+        .reveal-modal .btn-row .btn-confirm:active { background: #684a80; }
         .reveal-modal .btn-row .btn-confirm:disabled {
             opacity: 0.4;
             cursor: not-allowed;
@@ -534,15 +482,9 @@
             display: none;
         }
         @media (max-width: 480px) {
-            .app {
-                padding: 12px;
-            }
-            .row .half {
-                flex: 1 1 100%;
-            }
-            .admin-user-grid {
-                grid-template-columns: 1fr 1fr;
-            }
+            .app { padding: 12px; }
+            .row .half { flex: 1 1 100%; }
+            .admin-user-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -653,11 +595,10 @@
         // ============================================================
         //  🍾 树洞漂流瓶 · 完整 JavaScript
         //  后台密码：Syx0701！（不对外显示）
-        //  揭示身份：可选择揭晓「班级」「姓名」「性别」
         // ============================================================
 
         (function() {
-            // ---------- 🔐 后台密码（只有你知道） ----------
+            // ---------- 🔐 后台密码 ----------
             const ADMIN_PASSWORD = 'Syx0701！';
 
             // ---------- 数据 ----------
