@@ -4,7 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🍾 树洞漂流瓶 · 云端版</title>
-    <script src="https://cdn.bootcdn.net/ajax/libs/tcb/1.0.1/tcb.min.js"></script>
+    <!-- 使用国内可访问的CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@cloudbase/js-sdk@1.7.0/dist/index.umd.min.js">
+    </script>
+    <!-- 备用CDN -->
+    <script>
+        // 如果主CDN加载失败，尝试备用
+        if (typeof tcb === 'undefined') {
+            document.write('<script src="https://unpkg.com/@cloudbase/js-sdk@1.7.0/dist/index.umd.min.js"><\/script>');
+        }
+    </script>
     <style>
         * {
             box-sizing: border-box;
@@ -652,309 +661,160 @@
 
     <script>
         // ============================================================
-        //  🍾 树洞漂流瓶 · 腾讯云开发版（已修复）
+        //  🍾 树洞漂流瓶 · 腾讯云开发版
         //  环境 ID：bottle-d9gpcqa9hcbccfe0c
         //  后台密码：Syx0701！
         // ============================================================
 
         (function() {
 
-            // ---------- 1. 初始化腾讯云开发 ----------
-            var app = tcb.init({
-                env: 'bottle-d9gpcqa9hcbccfe0c'
-            });
+            // 等待SDK加载完成
+            function initApp() {
+                if (typeof tcb === 'undefined') {
+                    console.warn('⚠️ SDK未加载，3秒后重试...');
+                    setTimeout(initApp, 3000);
+                    return;
+                }
 
-            var db = app.database();
-            var _ = db.command;
+                console.log('✅ SDK加载成功，开始初始化...');
 
-            // ---------- 2. 匿名登录 ----------
-            var auth = app.auth({
-                persistence: 'local'
-            });
+                // ---------- 1. 初始化腾讯云开发 ----------
+                var app = tcb.init({
+                    env: 'bottle-d9gpcqa9hcbccfe0c'
+                });
 
-            // ---------- 3. 全局状态 ----------
-            var currentUser = null;
-            var isLogin = false;
-            var ADMIN_PASSWORD = 'Syx0701！';
-            var throwImageData = null;
-            var replyImageData = {};
-            var pendingReveal = null;
-            var allBottles = [];
+                var db = app.database();
+                var _ = db.command;
 
-            // ---------- 4. DOM 引用 ----------
-            function $(id) { return document.getElementById(id); }
+                // ---------- 2. 匿名登录 ----------
+                var auth = app.auth({
+                    persistence: 'local'
+                });
 
-            var bottleListEl = $('bottleList');
-            var statusEl = $('statusArea');
-            var throwBtn = $('throwBtn');
-            var pickBtn = $('pickBtn');
-            var newMessageEl = $('newMessage');
-            var adminPanel = $('adminPanel');
-            var adminContent = $('adminContent');
-            var throwPreview = $('throwPreview');
-            var throwImageInput = $('throwImageInput');
-            var throwRemoveImage = $('throwRemoveImage');
-            var modal = $('imageModal');
-            var modalImg = $('modalImage');
-            var revealModal = $('revealModal');
+                // ---------- 3. 全局状态 ----------
+                var currentUser = null;
+                var isLogin = false;
+                var ADMIN_PASSWORD = 'Syx0701！';
+                var throwImageData = null;
+                var replyImageData = {};
+                var pendingReveal = null;
+                var allBottles = [];
 
-            // ---------- 5. 工具函数 ----------
-            function status(msg, good) {
-                good = (good !== undefined) ? good : true;
-                statusEl.innerHTML = msg;
-                statusEl.style.background = good ? '#f2eaf7' : '#ffebee';
-                statusEl.style.color = good ? '#3f2a4e' : '#a13d4a';
-            }
+                // ---------- 4. DOM 引用 ----------
+                function $(id) { return document.getElementById(id); }
 
-            function getCurrentUser() {
-                return {
-                    className: $('userClass').value.trim() || '未知班级',
-                    name: $('userName').value.trim() || '匿名',
-                    id: $('userId').value.trim() || '0000',
-                    gender: $('userGender').value || '未知'
-                };
-            }
+                var bottleListEl = $('bottleList');
+                var statusEl = $('statusArea');
+                var throwBtn = $('throwBtn');
+                var pickBtn = $('pickBtn');
+                var newMessageEl = $('newMessage');
+                var adminPanel = $('adminPanel');
+                var adminContent = $('adminContent');
+                var throwPreview = $('throwPreview');
+                var throwImageInput = $('throwImageInput');
+                var throwRemoveImage = $('throwRemoveImage');
+                var modal = $('imageModal');
+                var modalImg = $('modalImage');
+                var revealModal = $('revealModal');
 
-            function getDisplayName(user, revealedData) {
-                if (!revealedData) return '🫥 匿名 (' + user.gender + ')';
-                var parts = [];
-                if (revealedData.class) parts.push(revealedData.class);
-                if (revealedData.name) parts.push(revealedData.name);
-                if (revealedData.gender) parts.push(revealedData.gender);
-                if (parts.length === 0) return '🫥 匿名 (' + user.gender + ')';
-                return '📌 ' + parts.join(' · ');
-            }
+                // ---------- 5. 工具函数 ----------
+                function status(msg, good) {
+                    good = (good !== undefined) ? good : true;
+                    statusEl.innerHTML = msg;
+                    statusEl.style.background = good ? '#f2eaf7' : '#ffebee';
+                    statusEl.style.color = good ? '#3f2a4e' : '#a13d4a';
+                }
 
-            function isSamePerson(a, b) {
-                if (!a || !b) return false;
-                return a.className === b.className && a.name === b.name && a.id === b.id;
-            }
-
-            function genId() {
-                return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-            }
-
-            // ---------- 6. 图片处理 ----------
-            window.openImage = function(data) {
-                modalImg.src = data;
-                modal.classList.add('open');
-            };
-
-            function compressImage(file, maxSize) {
-                maxSize = maxSize || 1.5 * 1024 * 1024;
-                return new Promise(function(resolve) {
-                    if (file.size < maxSize) {
-                        var reader = new FileReader();
-                        reader.onload = function(e) { resolve(e.target.result); };
-                        reader.readAsDataURL(file);
-                        return;
-                    }
-                    var reader = new FileReader();
-                    reader.onload = function(e) {
-                        var img = new Image();
-                        img.onload = function() {
-                            var canvas = document.createElement('canvas');
-                            var w = img.width,
-                                h = img.height;
-                            var maxDim = 1200;
-                            if (w > maxDim || h > maxDim) {
-                                var ratio = Math.min(maxDim / w, maxDim / h);
-                                w = Math.round(w * ratio);
-                                h = Math.round(h * ratio);
-                            }
-                            canvas.width = w;
-                            canvas.height = h;
-                            var ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, w, h);
-                            resolve(canvas.toDataURL('image/jpeg', 0.85));
-                        };
-                        img.src = e.target.result;
+                function getCurrentUser() {
+                    return {
+                        className: $('userClass').value.trim() || '未知班级',
+                        name: $('userName').value.trim() || '匿名',
+                        id: $('userId').value.trim() || '0000',
+                        gender: $('userGender').value || '未知'
                     };
-                    reader.readAsDataURL(file);
-                });
-            }
-
-            function renderImage(data, cls) {
-                cls = cls || '';
-                if (!data) return '';
-                return '<div class="' + cls + '" onclick="event.stopPropagation();openImage(\'' + data + '\')">' +
-                    '<img src="' + data + '" alt="配图" loading="lazy">' +
-                    '</div>';
-            }
-
-            // ---------- 7. 登录 ----------
-            function login() {
-                status('🔄 正在连接云端...', true);
-                auth.signInAnonymously().then(function(res) {
-                    currentUser = res.user;
-                    isLogin = true;
-                    console.log('✅ 匿名登录成功', currentUser);
-                    status('✅ 已连接云端', true);
-                    loadBottles();
-                })['catch'](function(err) {
-                    console.warn('⚠️ 登录失败，使用本地缓存', err);
-                    isLogin = false;
-                    var errMsg = err.errMsg || err.message || '未知错误';
-                    status('❌ 连接云端失败: ' + errMsg, false);
-                    try {
-                        var cached = localStorage.getItem('bottle_cache');
-                        if (cached) {
-                            allBottles = JSON.parse(cached);
-                            renderBottles();
-                            status('📡 离线模式（使用缓存）', false);
-                        }
-                    } catch (e) {}
-                });
-            }
-
-            // ---------- 8. 核心功能：投掷 ----------
-            function throwBottle() {
-                if (!isLogin) {
-                    status('⏳ 正在登录，请稍后重试...', false);
-                    login();
-                    setTimeout(function() {
-                        if (isLogin) {
-                            throwBottle();
-                        } else {
-                            status('❌ 登录失败，请刷新页面', false);
-                        }
-                    }, 3000);
-                    return;
                 }
 
-                var content = newMessageEl.value.trim();
-                if (!content && !throwImageData) {
-                    status('✍️ 请写点内容或上传图片', false);
-                    return;
-                }
-                var user = getCurrentUser();
-                if (!user.className || !user.name || !user.id) {
-                    status('⚠️ 请完整填写班级、姓名、学号', false);
-                    return;
+                function getDisplayName(user, revealedData) {
+                    if (!revealedData) return '🫥 匿名 (' + user.gender + ')';
+                    var parts = [];
+                    if (revealedData.class) parts.push(revealedData.class);
+                    if (revealedData.name) parts.push(revealedData.name);
+                    if (revealedData.gender) parts.push(revealedData.gender);
+                    if (parts.length === 0) return '🫥 匿名 (' + user.gender + ')';
+                    return '📌 ' + parts.join(' · ');
                 }
 
-                status('⏳ 正在投掷...', true);
+                function isSamePerson(a, b) {
+                    if (!a || !b) return false;
+                    return a.className === b.className && a.name === b.name && a.id === b.id;
+                }
 
-                var data = {
-                    content: content || '(图片消息)',
-                    image: throwImageData || null,
-                    fromUser: user,
-                    replies: [],
-                    revealA: false,
-                    revealAData: null,
-                    createTime: new Date().toISOString()
+                function genId() {
+                    return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+                }
+
+                // ---------- 6. 图片处理 ----------
+                window.openImage = function(data) {
+                    modalImg.src = data;
+                    modal.classList.add('open');
                 };
 
-                db.collection('bottles').add(data).then(function(res) {
-                    throwImageData = null;
-                    throwPreview.innerHTML = '➕';
-                    throwRemoveImage.style.display = 'none';
-                    newMessageEl.value = '';
-                    status('✅ 漂流瓶已投入树洞！', true);
-                    loadBottles();
-                    if (adminPanel.classList.contains('open')) renderAdmin();
-                })['catch'](function(err) {
-                    var errMsg = err.errMsg || err.message || '未知错误';
-                    console.error('投掷失败详情:', err);
-                    status('❌ 投掷失败: ' + errMsg, false);
-                    if (errMsg.indexOf('permission') !== -1) {
-                        status('❌ 数据库权限不足，请在控制台设置「所有用户可读写」', false);
-                    }
-                    if (errMsg.indexOf('env') !== -1) {
-                        status('❌ 环境ID无效，请检查控制台中的完整环境ID', false);
-                    }
-                });
-            }
-
-            // ---------- 9. 核心功能：拾取 ----------
-            function pickBottle() {
-                if (!allBottles.length) {
-                    status('🌊 还没有瓶子', false);
-                    return;
-                }
-                var user = getCurrentUser();
-                var available = [];
-                for (var i = 0; i < allBottles.length; i++) {
-                    var b = allBottles[i];
-                    if (!isSamePerson(user, b.fromUser)) {
-                        available.push(b);
-                    }
-                }
-                if (!available.length) {
-                    status('😅 没有别人的瓶子', false);
-                    return;
-                }
-                var picked = available[Math.floor(Math.random() * available.length)];
-                var hint = picked.image ? ' 📷' : '';
-                status('🎯 拾取到瓶子' + hint + '，请回复', true);
-
-                var replyMsg = prompt('📨 你拾取了一个漂流瓶:\n"' + picked.content + '"\n\n输入你的匿名回复:');
-                if (replyMsg === null) {
-                    status('已取消', false);
-                    return;
-                }
-                var img = replyImageData[picked._id] || null;
-                if (replyMsg.trim() === '' && !img) {
-                    status('请至少输入文字或选择图片', false);
-                    return;
-                }
-                addReply(picked._id, null, replyMsg.trim() || '(图片)', img);
-                delete replyImageData[picked._id];
-            }
-
-            // ---------- 10. 核心功能：回复 ----------
-            function addReply(bottleId, threadId, content, image) {
-                var bottle = null;
-                for (var i = 0; i < allBottles.length; i++) {
-                    if (allBottles[i]._id === bottleId) {
-                        bottle = allBottles[i];
-                        break;
-                    }
-                }
-                if (!bottle) {
-                    status('❌ 瓶子不见了', false);
-                    return;
+                function compressImage(file, maxSize) {
+                    maxSize = maxSize || 1.5 * 1024 * 1024;
+                    return new Promise(function(resolve) {
+                        if (file.size < maxSize) {
+                            var reader = new FileReader();
+                            reader.onload = function(e) { resolve(e.target.result); };
+                            reader.readAsDataURL(file);
+                            return;
+                        }
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            var img = new Image();
+                            img.onload = function() {
+                                var canvas = document.createElement('canvas');
+                                var w = img.width,
+                                    h = img.height;
+                                var maxDim = 1200;
+                                if (w > maxDim || h > maxDim) {
+                                    var ratio = Math.min(maxDim / w, maxDim / h);
+                                    w = Math.round(w * ratio);
+                                    h = Math.round(h * ratio);
+                                }
+                                canvas.width = w;
+                                canvas.height = h;
+                                var ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, w, h);
+                                resolve(canvas.toDataURL('image/jpeg', 0.85));
+                            };
+                            img.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
                 }
 
-                var user = getCurrentUser();
-                var reply = {
-                    id: genId(),
-                    fromUser: user,
-                    content: content,
-                    image: image || null,
-                    threadId: threadId || null,
-                    createTime: new Date().toISOString()
-                };
+                function renderImage(data, cls) {
+                    cls = cls || '';
+                    if (!data) return '';
+                    return '<div class="' + cls + '" onclick="event.stopPropagation();openImage(\'' + data + '\')">' +
+                        '<img src="' + data + '" alt="配图" loading="lazy">' +
+                        '</div>';
+                }
 
-                var replies = bottle.replies || [];
-                replies.push(reply);
-                db.collection('bottles').doc(bottle._id).update({
-                    replies: replies
-                }).then(function() {
-                    status('💬 回复已发送！', true);
-                    loadBottles();
-                    if (adminPanel.classList.contains('open')) renderAdmin();
-                })['catch'](function(err) {
-                    status('❌ 回复失败：' + err.message, false);
-                    console.error(err);
-                });
-            }
-
-            // ---------- 11. 加载所有瓶子 ----------
-            function loadBottles() {
-                db.collection('bottles')
-                    .orderBy('createTime', 'desc')
-                    .get()
-                    .then(function(res) {
-                        allBottles = res.data || [];
-                        try {
-                            localStorage.setItem('bottle_cache', JSON.stringify(allBottles));
-                        } catch (e) {}
-                        renderBottles();
-                        if (adminPanel.classList.contains('open')) renderAdmin();
-                        status('✅ 加载成功 (' + allBottles.length + ' 个瓶子)', true);
+                // ---------- 7. 登录 ----------
+                function login() {
+                    status('🔄 正在连接云端...', true);
+                    auth.signInAnonymously().then(function(res) {
+                        currentUser = res.user;
+                        isLogin = true;
+                        console.log('✅ 匿名登录成功', currentUser);
+                        status('✅ 已连接云端', true);
+                        loadBottles();
                     })['catch'](function(err) {
-                        console.warn('⚠️ 加载瓶子失败', err);
+                        console.warn('⚠️ 登录失败', err);
+                        isLogin = false;
+                        var errMsg = err.errMsg || err.message || '未知错误';
+                        status('❌ 连接云端失败: ' + errMsg, false);
                         try {
                             var cached = localStorage.getItem('bottle_cache');
                             if (cached) {
@@ -964,588 +824,779 @@
                             }
                         } catch (e) {}
                     });
-            }
-
-            // ---------- 12. 渲染瓶子列表 ----------
-            function renderBottles() {
-                if (!allBottles.length) {
-                    bottleListEl.innerHTML = '<div class="empty-state">🪸 还没有漂流瓶，来投一个吧</div>';
-                    return;
                 }
-                var user = getCurrentUser();
-                var html = '';
-                var sorted = allBottles.slice().reverse();
 
-                for (var i = 0; i < sorted.length; i++) {
-                    var bottle = sorted[i];
-                    var meA = isSamePerson(user, bottle.fromUser);
-                    var fromDisplay = getDisplayName(bottle.fromUser, bottle.revealAData);
-                    if (meA) fromDisplay += ' 👈 是你';
-
-                    html += '<div class="bubble">';
-                    html += '<div class="meta"><span>' + fromDisplay + '</span><span class="badge">#' + (bottle._id ?
-                        bottle._id.slice(-4) : '') + '</span></div>';
-                    html += '<div class="content">💬 ' + (bottle.content || '') + '</div>';
-                    if (bottle.image) html += renderImage(bottle.image, 'bubble-image');
-
-                    if (bottle.replies && bottle.replies.length) {
-                        var visible = [];
-                        if (meA) {
-                            visible = bottle.replies;
-                        } else {
-                            var myIds = [];
-                            for (var j = 0; j < bottle.replies.length; j++) {
-                                if (isSamePerson(user, bottle.replies[j].fromUser)) {
-                                    myIds.push(bottle.replies[j].id);
-                                }
-                            }
-                            for (var k = 0; k < bottle.replies.length; k++) {
-                                var r = bottle.replies[k];
-                                if (myIds.indexOf(r.id) !== -1) {
-                                    visible.push(r);
-                                } else if (isSamePerson(r.fromUser, bottle.fromUser) && myIds.indexOf(r
-                                        .threadId) !== -1) {
-                                    visible.push(r);
-                                }
-                            }
-                            var seen = {};
-                            var temp = [];
-                            for (var m = 0; m < visible.length; m++) {
-                                if (!seen[visible[m].id]) {
-                                    seen[visible[m].id] = true;
-                                    temp.push(visible[m]);
-                                }
-                            }
-                            visible = temp;
-                            visible.sort(function(a, b) {
-                                return (a.createTime || a.id || '').localeCompare(b.createTime || b.id || '');
-                            });
-                        }
-
-                        if (!visible.length) {
-                            html += '<div style="margin-top:6px;font-size:12px;color:#6d5380;">⏳ 尚无可见回复</div>';
-                        } else {
-                            for (var n = 0; n < visible.length; n++) {
-                                var reply = visible[n];
-                                var isMine = isSamePerson(user, reply.fromUser);
-                                var isReplyA = isSamePerson(reply.fromUser, bottle.fromUser);
-                                var revealedData = null;
-                                if (isReplyA) revealedData = bottle.revealAData;
-                                else if (bottle.revealMap && bottle.revealMap[reply.id]) revealedData = bottle
-                                    .revealMap[reply.id];
-                                var dname = getDisplayName(reply.fromUser, revealedData);
-                                var cls = isMine ? 'reply-item mine' : 'reply-item';
-                                html += '<div class="' + cls + '">';
-                                html += '<div class="rmeta"><span>' + dname + '</span><span class="tag">#' + (reply
-                                    .id ? reply.id.slice(-4) : '') + '</span></div>';
-                                html += '<div class="rcontent">' + (reply.content || '') + '</div>';
-                                if (reply.image) html += renderImage(reply.image, 'reply-image');
-
-                                if (isMine && !isReplyA) {
-                                    var isRevealed = bottle.revealMap && bottle.revealMap[reply.id];
-                                    if (!isRevealed) {
-                                        html += '<div style="margin-top:6px;">' +
-                                            '<button class="btn btn-success btn-sm reveal-btn" data-id="' + (bottle
-                                                ._id || '') + '" data-replyid="' + (reply.id || '') +
-                                            '" data-role="B">🔓 选择揭晓</button>' +
-                                            '</div>';
-                                    } else {
-                                        var rd = bottle.revealMap[reply.id];
-                                        var parts3 = [];
-                                        if (rd.class) parts3.push('班级');
-                                        if (rd.name) parts3.push('姓名');
-                                        if (rd.gender) parts3.push('性别');
-                                        html += '<div style="margin-top:6px;"><span class="hidden-info">✅ 已揭晓：' +
-                                            parts3.join('、') + '</span></div>';
-                                    }
-                                }
-
-                                html += '</div>';
-                            }
-                        }
-                    } else {
-                        html += '<div style="margin-top:6px;font-size:12px;color:#6d5380;">⏳ 暂无回复</div>';
-                    }
-
-                    var hasReplied = false;
-                    if (bottle.replies) {
-                        for (var p = 0; p < bottle.replies.length; p++) {
-                            if (isSamePerson(user, bottle.replies[p].fromUser)) {
-                                hasReplied = true;
-                                break;
-                            }
-                        }
-                    }
-                    var participant = meA || hasReplied;
-
-                    html += '<div class="actions">';
-                    if (participant) {
-                        html += '<button class="btn btn-ghost btn-sm reply-btn" data-id="' + (bottle._id || '') +
-                            '">✍️ 回复</button>';
-                        if (bottle.replies && bottle.replies.length) {
-                            html += '<button class="btn btn-ghost btn-sm reply-thread-btn" data-id="' + (bottle
-                                    ._id || '') + '">💬 回复某条</button>';
-                        }
-                        if (meA && !bottle.revealA) {
-                            html += '<button class="btn btn-success btn-sm reveal-btn" data-id="' + (bottle._id ||
-                                '') + '" data-role="A">🔓 选择揭晓</button>';
-                        } else if (meA && bottle.revealA) {
-                            var rd2 = bottle.revealAData;
-                            var parts4 = [];
-                            if (rd2 && rd2.class) parts4.push('班级');
-                            if (rd2 && rd2.name) parts4.push('姓名');
-                            if (rd2 && rd2.gender) parts4.push('性别');
-                            html += '<span class="hidden-info">✅ 已揭晓：' + parts4.join('、') + '</span>';
-                        }
-                    } else {
-                        html += '<span style="font-size:11px;color:#8d74a0;">🔒 仅参与者可互动</span>';
-                    }
-                    html += '</div>';
-                    html += '</div>';
-                }
-                bottleListEl.innerHTML = html;
-                bindEvents();
-            }
-
-            // ---------- 13. 事件绑定 ----------
-            function bindEvents() {
-                document.querySelectorAll('.reply-btn').forEach(function(btn) {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        var bottleId = this.dataset.id;
-                        var content = prompt('💬 输入你的回复内容 (可配图):');
-                        if (content === null) return;
-                        var img = replyImageData[bottleId] || null;
-                        if (content.trim() === '' && !img) {
-                            status('请至少输入文字或选择图片', false);
-                            return;
-                        }
-                        addReply(bottleId, null, content.trim() || '(图片)', img);
-                        delete replyImageData[bottleId];
-                    });
-                });
-
-                document.querySelectorAll('.reply-thread-btn').forEach(function(btn) {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        var bottleId = this.dataset.id;
-                        var bottle = null;
-                        for (var i = 0; i < allBottles.length; i++) {
-                            if (allBottles[i]._id === bottleId) {
-                                bottle = allBottles[i];
-                                break;
-                            }
-                        }
-                        if (!bottle || !bottle.replies || !bottle.replies.length) {
-                            status('没有可回复的条目', false);
-                            return;
-                        }
-                        var user = getCurrentUser();
-                        var visible2 = [];
-                        var meA = isSamePerson(user, bottle.fromUser);
-                        if (meA) {
-                            visible2 = bottle.replies;
-                        } else {
-                            var myIds2 = [];
-                            for (var j = 0; j < bottle.replies.length; j++) {
-                                if (isSamePerson(user, bottle.replies[j].fromUser)) {
-                                    myIds2.push(bottle.replies[j].id);
-                                }
-                            }
-                            for (var k = 0; k < bottle.replies.length; k++) {
-                                var r = bottle.replies[k];
-                                if (myIds2.indexOf(r.id) !== -1 || isSamePerson(r.fromUser, bottle.fromUser)) {
-                                    visible2.push(r);
-                                }
-                            }
-                        }
-                        if (!visible2.length) {
-                            status('没有你可回复的条目', false);
-                            return;
-                        }
-                        var list = '';
-                        for (var m = 0; m < visible2.length; m++) {
-                            list += (m + 1) + '. ' + (visible2[m].content || '').substring(0, 20) + '... (' + visible2[m]
-                                .fromUser.gender + ')\n';
-                        }
-                        var choice = prompt('选择要回复的条目 (输入编号 1-' + visible2.length + '):\n' + list);
-                        if (choice) {
-                            var idx = parseInt(choice) - 1;
-                            if (idx >= 0 && idx < visible2.length) {
-                                var target = visible2[idx];
-                                var content2 = prompt('💬 回复: "' + (target.content || '').substring(0, 30) +
-                                    '..."\n输入你的回复:');
-                                if (content2 === null) return;
-                                var img2 = replyImageData[bottleId] || null;
-                                if (content2.trim() === '' && !img2) {
-                                    status('请至少输入文字或选择图片', false);
-                                    return;
-                                }
-                                addReply(bottleId, target.id, content2.trim() || '(图片)', img2);
-                                delete replyImageData[bottleId];
+                // ---------- 8. 核心功能：投掷 ----------
+                function throwBottle() {
+                    if (!isLogin) {
+                        status('⏳ 正在登录，请稍后重试...', false);
+                        login();
+                        setTimeout(function() {
+                            if (isLogin) {
+                                throwBottle();
                             } else {
-                                status('无效编号', false);
+                                status('❌ 登录失败，请刷新页面', false);
                             }
+                        }, 3000);
+                        return;
+                    }
+
+                    var content = newMessageEl.value.trim();
+                    if (!content && !throwImageData) {
+                        status('✍️ 请写点内容或上传图片', false);
+                        return;
+                    }
+                    var user = getCurrentUser();
+                    if (!user.className || !user.name || !user.id) {
+                        status('⚠️ 请完整填写班级、姓名、学号', false);
+                        return;
+                    }
+
+                    status('⏳ 正在投掷...', true);
+
+                    var data = {
+                        content: content || '(图片消息)',
+                        image: throwImageData || null,
+                        fromUser: user,
+                        replies: [],
+                        revealA: false,
+                        revealAData: null,
+                        createTime: new Date().toISOString()
+                    };
+
+                    db.collection('bottles').add(data).then(function(res) {
+                        throwImageData = null;
+                        throwPreview.innerHTML = '➕';
+                        throwRemoveImage.style.display = 'none';
+                        newMessageEl.value = '';
+                        status('✅ 漂流瓶已投入树洞！', true);
+                        loadBottles();
+                        if (adminPanel.classList.contains('open')) renderAdmin();
+                    })['catch'](function(err) {
+                        var errMsg = err.errMsg || err.message || '未知错误';
+                        console.error('投掷失败详情:', err);
+                        status('❌ 投掷失败: ' + errMsg, false);
+                        if (errMsg.indexOf('permission') !== -1) {
+                            status('❌ 数据库权限不足，请在控制台设置「所有用户可读写」', false);
+                        }
+                        if (errMsg.indexOf('env') !== -1) {
+                            status('❌ 环境ID无效，请检查控制台中的完整环境ID', false);
                         }
                     });
-                });
-
-                document.querySelectorAll('.reveal-btn').forEach(function(btn) {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        var bottleId = this.dataset.id;
-                        var role = this.dataset.role;
-                        var replyId = this.dataset.replyid || null;
-                        showRevealModal(bottleId, role, replyId);
-                    });
-                });
-            }
-
-            // ---------- 14. 揭晓弹窗 ----------
-            function showRevealModal(bottleId, role, replyId) {
-                var bottle = null;
-                for (var i = 0; i < allBottles.length; i++) {
-                    if (allBottles[i]._id === bottleId) {
-                        bottle = allBottles[i];
-                        break;
-                    }
                 }
-                if (!bottle) {
-                    status('❌ 瓶子不见了', false);
-                    return;
-                }
-                var user = getCurrentUser();
 
-                if (role === 'A') {
-                    if (!isSamePerson(user, bottle.fromUser)) {
-                        status('⚠️ 你不是投递者', false);
+                // ---------- 9. 核心功能：拾取 ----------
+                function pickBottle() {
+                    if (!allBottles.length) {
+                        status('🌊 还没有瓶子', false);
                         return;
                     }
-                    if (bottle.revealA) {
-                        status('⚠️ 这条已经揭晓过了', false);
+                    var user = getCurrentUser();
+                    var available = [];
+                    for (var i = 0; i < allBottles.length; i++) {
+                        var b = allBottles[i];
+                        if (!isSamePerson(user, b.fromUser)) {
+                            available.push(b);
+                        }
+                    }
+                    if (!available.length) {
+                        status('😅 没有别人的瓶子', false);
                         return;
                     }
-                } else if (role === 'B') {
-                    if (!replyId) {
-                        status('❌ 缺少回复ID', false);
+                    var picked = available[Math.floor(Math.random() * available.length)];
+                    var hint = picked.image ? ' 📷' : '';
+                    status('🎯 拾取到瓶子' + hint + '，请回复', true);
+
+                    var replyMsg = prompt('📨 你拾取了一个漂流瓶:\n"' + picked.content + '"\n\n输入你的匿名回复:');
+                    if (replyMsg === null) {
+                        status('已取消', false);
                         return;
                     }
-                    var reply = null;
-                    for (var j = 0; j < bottle.replies.length; j++) {
-                        if (bottle.replies[j].id === replyId) {
-                            reply = bottle.replies[j];
+                    var img = replyImageData[picked._id] || null;
+                    if (replyMsg.trim() === '' && !img) {
+                        status('请至少输入文字或选择图片', false);
+                        return;
+                    }
+                    addReply(picked._id, null, replyMsg.trim() || '(图片)', img);
+                    delete replyImageData[picked._id];
+                }
+
+                // ---------- 10. 核心功能：回复 ----------
+                function addReply(bottleId, threadId, content, image) {
+                    var bottle = null;
+                    for (var i = 0; i < allBottles.length; i++) {
+                        if (allBottles[i]._id === bottleId) {
+                            bottle = allBottles[i];
                             break;
                         }
                     }
-                    if (!reply) {
-                        status('❌ 回复不存在', false);
+                    if (!bottle) {
+                        status('❌ 瓶子不见了', false);
                         return;
                     }
-                    if (!isSamePerson(user, reply.fromUser)) {
-                        status('⚠️ 这不是你的回复', false);
-                        return;
-                    }
-                    if (bottle.revealMap && bottle.revealMap[replyId]) {
-                        status('⚠️ 这条回复已经揭晓过了', false);
-                        return;
-                    }
-                } else {
-                    status('❌ 角色错误', false);
-                    return;
-                }
 
-                pendingReveal = { bottleId: bottleId, role: role, replyId: replyId, user: user };
+                    var user = getCurrentUser();
+                    var reply = {
+                        id: genId(),
+                        fromUser: user,
+                        content: content,
+                        image: image || null,
+                        threadId: threadId || null,
+                        createTime: new Date().toISOString()
+                    };
 
-                $('revealClassValue').textContent = user.className || '未填写';
-                $('revealNameValue').textContent = user.name || '未填写';
-                $('revealGenderValue').textContent = user.gender || '未填写';
-
-                $('revealClass').checked = false;
-                $('revealName').checked = false;
-                $('revealGender').checked = false;
-                $('revealError').style.display = 'none';
-                $('revealConfirmBtn').disabled = false;
-
-                revealModal.classList.add('open');
-            }
-
-            // ---------- 15. 揭晓确认 ----------
-            $('revealConfirmBtn').addEventListener('click', function() {
-                var classChecked = $('revealClass').checked;
-                var nameChecked = $('revealName').checked;
-                var genderChecked = $('revealGender').checked;
-
-                if (!classChecked && !nameChecked && !genderChecked) {
-                    $('revealError').style.display = 'block';
-                    return;
-                }
-                $('revealError').style.display = 'none';
-
-                if (!pendingReveal) return;
-                var bottleId = pendingReveal.bottleId;
-                var role = pendingReveal.role;
-                var replyId = pendingReveal.replyId;
-                var user = pendingReveal.user;
-
-                var bottle = null;
-                for (var i = 0; i < allBottles.length; i++) {
-                    if (allBottles[i]._id === bottleId) {
-                        bottle = allBottles[i];
-                        break;
-                    }
-                }
-                if (!bottle) {
-                    status('❌ 瓶子消失了', false);
-                    return;
-                }
-
-                var revealedInfo = {
-                    class: classChecked ? user.className : null,
-                    name: nameChecked ? user.name : null,
-                    gender: genderChecked ? user.gender : null
-                };
-
-                if (role === 'A') {
+                    var replies = bottle.replies || [];
+                    replies.push(reply);
                     db.collection('bottles').doc(bottle._id).update({
-                        revealA: true,
-                        revealAData: revealedInfo
+                        replies: replies
                     }).then(function() {
-                        var parts = [];
-                        if (revealedInfo.class) parts.push('班级');
-                        if (revealedInfo.name) parts.push('姓名');
-                        if (revealedInfo.gender) parts.push('性别');
-                        status('✅ 你已揭晓：' + parts.join('、'), true);
+                        status('💬 回复已发送！', true);
                         loadBottles();
+                        if (adminPanel.classList.contains('open')) renderAdmin();
                     })['catch'](function(err) {
-                        status('❌ 揭晓失败：' + err.message, false);
-                    });
-                } else if (role === 'B') {
-                    var map = bottle.revealMap || {};
-                    map[replyId] = revealedInfo;
-                    db.collection('bottles').doc(bottle._id).update({
-                        revealMap: map
-                    }).then(function() {
-                        var parts = [];
-                        if (revealedInfo.class) parts.push('班级');
-                        if (revealedInfo.name) parts.push('姓名');
-                        if (revealedInfo.gender) parts.push('性别');
-                        status('✅ 你已揭晓：' + parts.join('、'), true);
-                        loadBottles();
-                    })['catch'](function(err) {
-                        status('❌ 揭晓失败：' + err.message, false);
+                        status('❌ 回复失败：' + err.message, false);
+                        console.error(err);
                     });
                 }
 
-                revealModal.classList.remove('open');
-                pendingReveal = null;
-                if (adminPanel.classList.contains('open')) renderAdmin();
-            });
+                // ---------- 11. 加载所有瓶子 ----------
+                function loadBottles() {
+                    db.collection('bottles')
+                        .orderBy('createTime', 'desc')
+                        .get()
+                        .then(function(res) {
+                            allBottles = res.data || [];
+                            try {
+                                localStorage.setItem('bottle_cache', JSON.stringify(allBottles));
+                            } catch (e) {}
+                            renderBottles();
+                            if (adminPanel.classList.contains('open')) renderAdmin();
+                            status('✅ 加载成功 (' + allBottles.length + ' 个瓶子)', true);
+                        })['catch'](function(err) {
+                            console.warn('⚠️ 加载瓶子失败', err);
+                            try {
+                                var cached = localStorage.getItem('bottle_cache');
+                                if (cached) {
+                                    allBottles = JSON.parse(cached);
+                                    renderBottles();
+                                    status('📡 离线模式（使用缓存）', false);
+                                }
+                            } catch (e) {}
+                        });
+                }
 
-            $('revealCancelBtn').addEventListener('click', function() {
-                revealModal.classList.remove('open');
-                pendingReveal = null;
-                status('已取消揭晓', true);
-            });
+                // ---------- 12. 渲染瓶子列表 ----------
+                function renderBottles() {
+                    if (!allBottles.length) {
+                        bottleListEl.innerHTML = '<div class="empty-state">🪸 还没有漂流瓶，来投一个吧</div>';
+                        return;
+                    }
+                    var user = getCurrentUser();
+                    var html = '';
+                    var sorted = allBottles.slice().reverse();
 
-            revealModal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.remove('open');
+                    for (var i = 0; i < sorted.length; i++) {
+                        var bottle = sorted[i];
+                        var meA = isSamePerson(user, bottle.fromUser);
+                        var fromDisplay = getDisplayName(bottle.fromUser, bottle.revealAData);
+                        if (meA) fromDisplay += ' 👈 是你';
+
+                        html += '<div class="bubble">';
+                        html += '<div class="meta"><span>' + fromDisplay + '</span><span class="badge">#' + (bottle
+                            ._id ?
+                            bottle._id.slice(-4) : '') + '</span></div>';
+                        html += '<div class="content">💬 ' + (bottle.content || '') + '</div>';
+                        if (bottle.image) html += renderImage(bottle.image, 'bubble-image');
+
+                        if (bottle.replies && bottle.replies.length) {
+                            var visible = [];
+                            if (meA) {
+                                visible = bottle.replies;
+                            } else {
+                                var myIds = [];
+                                for (var j = 0; j < bottle.replies.length; j++) {
+                                    if (isSamePerson(user, bottle.replies[j].fromUser)) {
+                                        myIds.push(bottle.replies[j].id);
+                                    }
+                                }
+                                for (var k = 0; k < bottle.replies.length; k++) {
+                                    var r = bottle.replies[k];
+                                    if (myIds.indexOf(r.id) !== -1) {
+                                        visible.push(r);
+                                    } else if (isSamePerson(r.fromUser, bottle.fromUser) && myIds.indexOf(r
+                                            .threadId) !== -1) {
+                                        visible.push(r);
+                                    }
+                                }
+                                var seen = {};
+                                var temp = [];
+                                for (var m = 0; m < visible.length; m++) {
+                                    if (!seen[visible[m].id]) {
+                                        seen[visible[m].id] = true;
+                                        temp.push(visible[m]);
+                                    }
+                                }
+                                visible = temp;
+                                visible.sort(function(a, b) {
+                                    return (a.createTime || a.id || '').localeCompare(b.createTime || b.id ||
+                                    '');
+                                });
+                            }
+
+                            if (!visible.length) {
+                                html += '<div style="margin-top:6px;font-size:12px;color:#6d5380;">⏳ 尚无可见回复</div>';
+                            } else {
+                                for (var n = 0; n < visible.length; n++) {
+                                    var reply = visible[n];
+                                    var isMine = isSamePerson(user, reply.fromUser);
+                                    var isReplyA = isSamePerson(reply.fromUser, bottle.fromUser);
+                                    var revealedData = null;
+                                    if (isReplyA) revealedData = bottle.revealAData;
+                                    else if (bottle.revealMap && bottle.revealMap[reply.id]) revealedData = bottle
+                                        .revealMap[reply.id];
+                                    var dname = getDisplayName(reply.fromUser, revealedData);
+                                    var cls = isMine ? 'reply-item mine' : 'reply-item';
+                                    html += '<div class="' + cls + '">';
+                                    html += '<div class="rmeta"><span>' + dname + '</span><span class="tag">#' + (
+                                        reply
+                                        .id ? reply.id.slice(-4) : '') + '</span></div>';
+                                    html += '<div class="rcontent">' + (reply.content || '') + '</div>';
+                                    if (reply.image) html += renderImage(reply.image, 'reply-image');
+
+                                    if (isMine && !isReplyA) {
+                                        var isRevealed = bottle.revealMap && bottle.revealMap[reply.id];
+                                        if (!isRevealed) {
+                                            html += '<div style="margin-top:6px;">' +
+                                                '<button class="btn btn-success btn-sm reveal-btn" data-id="' + (
+                                                    bottle
+                                                    ._id || '') + '" data-replyid="' + (reply.id || '') +
+                                                '" data-role="B">🔓 选择揭晓</button>' +
+                                                '</div>';
+                                        } else {
+                                            var rd = bottle.revealMap[reply.id];
+                                            var parts3 = [];
+                                            if (rd.class) parts3.push('班级');
+                                            if (rd.name) parts3.push('姓名');
+                                            if (rd.gender) parts3.push('性别');
+                                            html += '<div style="margin-top:6px;"><span class="hidden-info">✅ 已揭晓：' +
+                                                parts3.join('、') + '</span></div>';
+                                        }
+                                    }
+
+                                    html += '</div>';
+                                }
+                            }
+                        } else {
+                            html += '<div style="margin-top:6px;font-size:12px;color:#6d5380;">⏳ 暂无回复</div>';
+                        }
+
+                        var hasReplied = false;
+                        if (bottle.replies) {
+                            for (var p = 0; p < bottle.replies.length; p++) {
+                                if (isSamePerson(user, bottle.replies[p].fromUser)) {
+                                    hasReplied = true;
+                                    break;
+                                }
+                            }
+                        }
+                        var participant = meA || hasReplied;
+
+                        html += '<div class="actions">';
+                        if (participant) {
+                            html += '<button class="btn btn-ghost btn-sm reply-btn" data-id="' + (bottle._id || '') +
+                                '">✍️ 回复</button>';
+                            if (bottle.replies && bottle.replies.length) {
+                                html += '<button class="btn btn-ghost btn-sm reply-thread-btn" data-id="' + (bottle
+                                        ._id || '') + '">💬 回复某条</button>';
+                            }
+                            if (meA && !bottle.revealA) {
+                                html += '<button class="btn btn-success btn-sm reveal-btn" data-id="' + (bottle
+                                    ._id ||
+                                    '') + '" data-role="A">🔓 选择揭晓</button>';
+                            } else if (meA && bottle.revealA) {
+                                var rd2 = bottle.revealAData;
+                                var parts4 = [];
+                                if (rd2 && rd2.class) parts4.push('班级');
+                                if (rd2 && rd2.name) parts4.push('姓名');
+                                if (rd2 && rd2.gender) parts4.push('性别');
+                                html += '<span class="hidden-info">✅ 已揭晓：' + parts4.join('、') + '</span>';
+                            }
+                        } else {
+                            html += '<span style="font-size:11px;color:#8d74a0;">🔒 仅参与者可互动</span>';
+                        }
+                        html += '</div>';
+                        html += '</div>';
+                    }
+                    bottleListEl.innerHTML = html;
+                    bindEvents();
+                }
+
+                // ---------- 13. 事件绑定 ----------
+                function bindEvents() {
+                    document.querySelectorAll('.reply-btn').forEach(function(btn) {
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            var bottleId = this.dataset.id;
+                            var content = prompt('💬 输入你的回复内容 (可配图):');
+                            if (content === null) return;
+                            var img = replyImageData[bottleId] || null;
+                            if (content.trim() === '' && !img) {
+                                status('请至少输入文字或选择图片', false);
+                                return;
+                            }
+                            addReply(bottleId, null, content.trim() || '(图片)', img);
+                            delete replyImageData[bottleId];
+                        });
+                    });
+
+                    document.querySelectorAll('.reply-thread-btn').forEach(function(btn) {
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            var bottleId = this.dataset.id;
+                            var bottle = null;
+                            for (var i = 0; i < allBottles.length; i++) {
+                                if (allBottles[i]._id === bottleId) {
+                                    bottle = allBottles[i];
+                                    break;
+                                }
+                            }
+                            if (!bottle || !bottle.replies || !bottle.replies.length) {
+                                status('没有可回复的条目', false);
+                                return;
+                            }
+                            var user = getCurrentUser();
+                            var visible2 = [];
+                            var meA = isSamePerson(user, bottle.fromUser);
+                            if (meA) {
+                                visible2 = bottle.replies;
+                            } else {
+                                var myIds2 = [];
+                                for (var j = 0; j < bottle.replies.length; j++) {
+                                    if (isSamePerson(user, bottle.replies[j].fromUser)) {
+                                        myIds2.push(bottle.replies[j].id);
+                                    }
+                                }
+                                for (var k = 0; k < bottle.replies.length; k++) {
+                                    var r = bottle.replies[k];
+                                    if (myIds2.indexOf(r.id) !== -1 || isSamePerson(r.fromUser, bottle
+                                        .fromUser)) {
+                                        visible2.push(r);
+                                    }
+                                }
+                            }
+                            if (!visible2.length) {
+                                status('没有你可回复的条目', false);
+                                return;
+                            }
+                            var list = '';
+                            for (var m = 0; m < visible2.length; m++) {
+                                list += (m + 1) + '. ' + (visible2[m].content || '').substring(0, 20) + '... (' +
+                                    visible2[m]
+                                    .fromUser.gender + ')\n';
+                            }
+                            var choice = prompt('选择要回复的条目 (输入编号 1-' + visible2.length + '):\n' + list);
+                            if (choice) {
+                                var idx = parseInt(choice) - 1;
+                                if (idx >= 0 && idx < visible2.length) {
+                                    var target = visible2[idx];
+                                    var content2 = prompt('💬 回复: "' + (target.content || '').substring(0, 30) +
+                                        '..."\n输入你的回复:');
+                                    if (content2 === null) return;
+                                    var img2 = replyImageData[bottleId] || null;
+                                    if (content2.trim() === '' && !img2) {
+                                        status('请至少输入文字或选择图片', false);
+                                        return;
+                                    }
+                                    addReply(bottleId, target.id, content2.trim() || '(图片)', img2);
+                                    delete replyImageData[bottleId];
+                                } else {
+                                    status('无效编号', false);
+                                }
+                            }
+                        });
+                    });
+
+                    document.querySelectorAll('.reveal-btn').forEach(function(btn) {
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            var bottleId = this.dataset.id;
+                            var role = this.dataset.role;
+                            var replyId = this.dataset.replyid || null;
+                            showRevealModal(bottleId, role, replyId);
+                        });
+                    });
+                }
+
+                // ---------- 14. 揭晓弹窗 ----------
+                function showRevealModal(bottleId, role, replyId) {
+                    var bottle = null;
+                    for (var i = 0; i < allBottles.length; i++) {
+                        if (allBottles[i]._id === bottleId) {
+                            bottle = allBottles[i];
+                            break;
+                        }
+                    }
+                    if (!bottle) {
+                        status('❌ 瓶子不见了', false);
+                        return;
+                    }
+                    var user = getCurrentUser();
+
+                    if (role === 'A') {
+                        if (!isSamePerson(user, bottle.fromUser)) {
+                            status('⚠️ 你不是投递者', false);
+                            return;
+                        }
+                        if (bottle.revealA) {
+                            status('⚠️ 这条已经揭晓过了', false);
+                            return;
+                        }
+                    } else if (role === 'B') {
+                        if (!replyId) {
+                            status('❌ 缺少回复ID', false);
+                            return;
+                        }
+                        var reply = null;
+                        for (var j = 0; j < bottle.replies.length; j++) {
+                            if (bottle.replies[j].id === replyId) {
+                                reply = bottle.replies[j];
+                                break;
+                            }
+                        }
+                        if (!reply) {
+                            status('❌ 回复不存在', false);
+                            return;
+                        }
+                        if (!isSamePerson(user, reply.fromUser)) {
+                            status('⚠️ 这不是你的回复', false);
+                            return;
+                        }
+                        if (bottle.revealMap && bottle.revealMap[replyId]) {
+                            status('⚠️ 这条回复已经揭晓过了', false);
+                            return;
+                        }
+                    } else {
+                        status('❌ 角色错误', false);
+                        return;
+                    }
+
+                    pendingReveal = { bottleId: bottleId, role: role, replyId: replyId, user: user };
+
+                    $('revealClassValue').textContent = user.className || '未填写';
+                    $('revealNameValue').textContent = user.name || '未填写';
+                    $('revealGenderValue').textContent = user.gender || '未填写';
+
+                    $('revealClass').checked = false;
+                    $('revealName').checked = false;
+                    $('revealGender').checked = false;
+                    $('revealError').style.display = 'none';
+                    $('revealConfirmBtn').disabled = false;
+
+                    revealModal.classList.add('open');
+                }
+
+                // ---------- 15. 揭晓确认 ----------
+                $('revealConfirmBtn').addEventListener('click', function() {
+                    var classChecked = $('revealClass').checked;
+                    var nameChecked = $('revealName').checked;
+                    var genderChecked = $('revealGender').checked;
+
+                    if (!classChecked && !nameChecked && !genderChecked) {
+                        $('revealError').style.display = 'block';
+                        return;
+                    }
+                    $('revealError').style.display = 'none';
+
+                    if (!pendingReveal) return;
+                    var bottleId = pendingReveal.bottleId;
+                    var role = pendingReveal.role;
+                    var replyId = pendingReveal.replyId;
+                    var user = pendingReveal.user;
+
+                    var bottle = null;
+                    for (var i = 0; i < allBottles.length; i++) {
+                        if (allBottles[i]._id === bottleId) {
+                            bottle = allBottles[i];
+                            break;
+                        }
+                    }
+                    if (!bottle) {
+                        status('❌ 瓶子消失了', false);
+                        return;
+                    }
+
+                    var revealedInfo = {
+                        class: classChecked ? user.className : null,
+                        name: nameChecked ? user.name : null,
+                        gender: genderChecked ? user.gender : null
+                    };
+
+                    if (role === 'A') {
+                        db.collection('bottles').doc(bottle._id).update({
+                            revealA: true,
+                            revealAData: revealedInfo
+                        }).then(function() {
+                            var parts = [];
+                            if (revealedInfo.class) parts.push('班级');
+                            if (revealedInfo.name) parts.push('姓名');
+                            if (revealedInfo.gender) parts.push('性别');
+                            status('✅ 你已揭晓：' + parts.join('、'), true);
+                            loadBottles();
+                        })['catch'](function(err) {
+                            status('❌ 揭晓失败：' + err.message, false);
+                        });
+                    } else if (role === 'B') {
+                        var map = bottle.revealMap || {};
+                        map[replyId] = revealedInfo;
+                        db.collection('bottles').doc(bottle._id).update({
+                            revealMap: map
+                        }).then(function() {
+                            var parts = [];
+                            if (revealedInfo.class) parts.push('班级');
+                            if (revealedInfo.name) parts.push('姓名');
+                            if (revealedInfo.gender) parts.push('性别');
+                            status('✅ 你已揭晓：' + parts.join('、'), true);
+                            loadBottles();
+                        })['catch'](function(err) {
+                            status('❌ 揭晓失败：' + err.message, false);
+                        });
+                    }
+
+                    revealModal.classList.remove('open');
+                    pendingReveal = null;
+                    if (adminPanel.classList.contains('open')) renderAdmin();
+                });
+
+                $('revealCancelBtn').addEventListener('click', function() {
+                    revealModal.classList.remove('open');
                     pendingReveal = null;
                     status('已取消揭晓', true);
-                }
-            });
+                });
 
-            // ---------- 16. 后台管理 ----------
-            function renderAdmin() {
-                if (!allBottles.length) {
-                    adminContent.innerHTML = '<p style="color:#6a4f7a;">📭 暂无数据</p>';
-                    return;
-                }
-
-                var userMap = new Map();
-                for (var i = 0; i < allBottles.length; i++) {
-                    var b = allBottles[i];
-                    var key = b.fromUser.id + '|' + b.fromUser.className;
-                    if (!userMap.has(key)) {
-                        userMap.set(key, {
-                            className: b.fromUser.className,
-                            name: b.fromUser.name,
-                            id: b.fromUser.id,
-                            gender: b.fromUser.gender,
-                            role: '投递者',
-                            bottleCount: 1
-                        });
-                    } else {
-                        var existing = userMap.get(key);
-                        existing.bottleCount += 1;
+                revealModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('open');
+                        pendingReveal = null;
+                        status('已取消揭晓', true);
                     }
-                    for (var j = 0; j < (b.replies || []).length; j++) {
-                        var r = b.replies[j];
-                        var rkey = r.fromUser.id + '|' + r.fromUser.className;
-                        if (!userMap.has(rkey)) {
-                            userMap.set(rkey, {
-                                className: r.fromUser.className,
-                                name: r.fromUser.name,
-                                id: r.fromUser.id,
-                                gender: r.fromUser.gender,
-                                role: '回复者',
-                                replyCount: 1
+                });
+
+                // ---------- 16. 后台管理 ----------
+                function renderAdmin() {
+                    if (!allBottles.length) {
+                        adminContent.innerHTML = '<p style="color:#6a4f7a;">📭 暂无数据</p>';
+                        return;
+                    }
+
+                    var userMap = new Map();
+                    for (var i = 0; i < allBottles.length; i++) {
+                        var b = allBottles[i];
+                        var key = b.fromUser.id + '|' + b.fromUser.className;
+                        if (!userMap.has(key)) {
+                            userMap.set(key, {
+                                className: b.fromUser.className,
+                                name: b.fromUser.name,
+                                id: b.fromUser.id,
+                                gender: b.fromUser.gender,
+                                role: '投递者',
+                                bottleCount: 1
                             });
                         } else {
-                            var existing2 = userMap.get(rkey);
-                            existing2.replyCount = (existing2.replyCount || 0) + 1;
-                            if (existing2.role !== '投递者' && existing2.role !== '投递者+回复者') {
-                                existing2.role = '回复者';
+                            var existing = userMap.get(key);
+                            existing.bottleCount += 1;
+                        }
+                        for (var j = 0; j < (b.replies || []).length; j++) {
+                            var r = b.replies[j];
+                            var rkey = r.fromUser.id + '|' + r.fromUser.className;
+                            if (!userMap.has(rkey)) {
+                                userMap.set(rkey, {
+                                    className: r.fromUser.className,
+                                    name: r.fromUser.name,
+                                    id: r.fromUser.id,
+                                    gender: r.fromUser.gender,
+                                    role: '回复者',
+                                    replyCount: 1
+                                });
+                            } else {
+                                var existing2 = userMap.get(rkey);
+                                existing2.replyCount = (existing2.replyCount || 0) + 1;
+                                if (existing2.role !== '投递者' && existing2.role !== '投递者+回复者') {
+                                    existing2.role = '回复者';
+                                }
                             }
                         }
                     }
-                }
 
-                var html = '';
-                html += '<h3 style="font-size:15px;color:#2a1a38;margin-bottom:8px;">👥 所有参与用户 (' + userMap.size + '人)</h3>';
-                html += '<div class="admin-user-grid">';
-                var userArray = Array.from(userMap.values());
-                for (var k = 0; k < userArray.length; k++) {
-                    var u = userArray[k];
-                    var roleTag = u.role === '投递者' ? '📤' : u.role === '回复者' ? '📥' : '📤📥';
-                    html += '<div class="admin-user-card">';
-                    html += '<div class="name">' + u.name + '</div>';
-                    html += '<div class="detail">' + u.className + ' · ' + u.gender + '</div>';
-                    html += '<div class="detail" style="font-size:11px;color:#7e6193;">学号: ' + u.id + ' · ' + roleTag +
-                        '</div>';
-                    html += '</div>';
-                }
-                html += '</div>';
-
-                html += '<hr><h3 style="font-size:15px;color:#2a1a38;margin:12px 0 8px;">📦 所有瓶子及回复</h3>';
-                for (var m = 0; m < allBottles.length; m++) {
-                    var b2 = allBottles[m];
-                    html += '<div class="admin-bottle-item">';
-                    html += '<div class="admin-meta">📌 <strong>' + b2.fromUser.name + '</strong> (' + b2.fromUser
-                        .className + ' · ' + b2.fromUser.gender + ' · 学号:' + b2.fromUser.id + ')</div>';
-                    html += '<div style="font-size:15px;margin-bottom:4px;">💬 ' + b2.content + '</div>';
-                    if (b2.image) {
-                        html += '<div style="font-size:12px;color:#7e6193;margin-bottom:4px;">📷 有配图</div>';
+                    var html = '';
+                    html += '<h3 style="font-size:15px;color:#2a1a38;margin-bottom:8px;">👥 所有参与用户 (' + userMap.size +
+                        '人)</h3>';
+                    html += '<div class="admin-user-grid">';
+                    var userArray = Array.from(userMap.values());
+                    for (var k = 0; k < userArray.length; k++) {
+                        var u = userArray[k];
+                        var roleTag = u.role === '投递者' ? '📤' : u.role === '回复者' ? '📥' : '📤📥';
+                        html += '<div class="admin-user-card">';
+                        html += '<div class="name">' + u.name + '</div>';
+                        html += '<div class="detail">' + u.className + ' · ' + u.gender + '</div>';
+                        html += '<div class="detail" style="font-size:11px;color:#7e6193;">学号: ' + u.id + ' · ' +
+                            roleTag +
+                            '</div>';
+                        html += '</div>';
                     }
-                    if (b2.replies && b2.replies.length) {
-                        for (var n = 0; n < b2.replies.length; n++) {
-                            var r2 = b2.replies[n];
-                            var isA2 = isSamePerson(r2.fromUser, b2.fromUser);
-                            var label = isA2 ? '↩️ [投递者]' : '↪️ [回复者]';
-                            html += '<div class="admin-reply">' + label + ' <strong>' + r2.fromUser.name +
-                                '</strong> (' + r2.fromUser.className + ' · ' + r2.fromUser.gender + ' · 学号:' + r2
-                                .fromUser.id + ')<br>“' + r2.content + '”';
-                            if (r2.image) html += ' <span style="color:#7e6193;">📷</span>';
-                            html += '</div>';
+                    html += '</div>';
+
+                    html += '<hr><h3 style="font-size:15px;color:#2a1a38;margin:12px 0 8px;">📦 所有瓶子及回复</h3>';
+                    for (var m = 0; m < allBottles.length; m++) {
+                        var b2 = allBottles[m];
+                        html += '<div class="admin-bottle-item">';
+                        html += '<div class="admin-meta">📌 <strong>' + b2.fromUser.name + '</strong> (' + b2
+                            .fromUser
+                            .className + ' · ' + b2.fromUser.gender + ' · 学号:' + b2.fromUser.id + ')</div>';
+                        html += '<div style="font-size:15px;margin-bottom:4px;">💬 ' + b2.content + '</div>';
+                        if (b2.image) {
+                            html += '<div style="font-size:12px;color:#7e6193;margin-bottom:4px;">📷 有配图</div>';
                         }
-                    } else {
-                        html += '<div style="font-size:13px;color:#8d74a0;">暂无回复</div>';
+                        if (b2.replies && b2.replies.length) {
+                            for (var n = 0; n < b2.replies.length; n++) {
+                                var r2 = b2.replies[n];
+                                var isA2 = isSamePerson(r2.fromUser, b2.fromUser);
+                                var label = isA2 ? '↩️ [投递者]' : '↪️ [回复者]';
+                                html += '<div class="admin-reply">' + label + ' <strong>' + r2.fromUser.name +
+                                    '</strong> (' + r2.fromUser.className + ' · ' + r2.fromUser.gender +
+                                    ' · 学号:' + r2
+                                    .fromUser.id + ')<br>“' + r2.content + '”';
+                                if (r2.image) html += ' <span style="color:#7e6193;">📷</span>';
+                                html += '</div>';
+                            }
+                        } else {
+                            html += '<div style="font-size:13px;color:#8d74a0;">暂无回复</div>';
+                        }
+                        html += '</div>';
                     }
-                    html += '</div>';
+
+                    adminContent.innerHTML = html;
                 }
 
-                adminContent.innerHTML = html;
-            }
+                // ---------- 17. 清空数据 ----------
+                function clearAllData() {
+                    if (!confirm('⚠️ 确定要清空所有数据吗？此操作不可恢复！')) return;
+                    if (!confirm('🔄 再次确认：真的要删除所有瓶子吗？')) return;
 
-            // ---------- 17. 清空数据 ----------
-            function clearAllData() {
-                if (!confirm('⚠️ 确定要清空所有数据吗？此操作不可恢复！')) return;
-                if (!confirm('🔄 再次确认：真的要删除所有瓶子吗？')) return;
-
-                status('⏳ 正在清空...', true);
-                db.collection('bottles').where({
-                    _id: _.neq('')
-                }).remove().then(function() {
-                    status('🗑️ 已清空所有数据', true);
-                    loadBottles();
-                    if (adminPanel.classList.contains('open')) renderAdmin();
-                })['catch'](function(err) {
-                    status('❌ 清空失败：' + err.message, false);
-                });
-            }
-
-            // ---------- 18. 图片上传事件 ----------
-            throwImageInput.addEventListener('change', function(e) {
-                var file = e.target.files[0];
-                if (!file) return;
-                if (file.size > 5 * 1024 * 1024) {
-                    status('⚠️ 图片超过 5MB，请压缩后上传', false);
-                    this.value = '';
-                    return;
-                }
-                compressImage(file).then(function(dataUrl) {
-                    throwImageData = dataUrl;
-                    throwPreview.innerHTML = '<img src="' + dataUrl +
-                        '" alt="预览" style="width:100%;height:100%;object-fit:cover;">';
-                    throwRemoveImage.style.display = 'inline-block';
-                    status('✅ 图片已添加', true);
-                })['catch'](function(err) {
-                    status('❌ 图片处理失败', false);
-                });
-                this.value = '';
-            });
-
-            throwRemoveImage.addEventListener('click', function() {
-                throwImageData = null;
-                throwPreview.innerHTML = '➕';
-                this.style.display = 'none';
-                status('已移除图片', true);
-            });
-
-            // ---------- 19. 后台按钮 ----------
-            $('adminToggleBtn').addEventListener('click', function() {
-                if (adminPanel.classList.contains('open')) {
-                    adminPanel.classList.remove('open');
-                    this.textContent = '🔐 后台';
-                    return;
-                }
-                var pwd = prompt('🔐 请输入后台密码:');
-                if (pwd === null) {
-                    status('已取消', true);
-                    return;
-                }
-                if (pwd !== ADMIN_PASSWORD) {
-                    status('❌ 密码错误', false);
-                    return;
-                }
-                adminPanel.classList.add('open');
-                this.textContent = '🔐 关闭后台';
-                renderAdmin();
-                status('✅ 后台已解锁', true);
-            });
-
-            $('adminCloseBtn').addEventListener('click', function() {
-                adminPanel.classList.remove('open');
-                $('adminToggleBtn').textContent = '🔐 后台';
-            });
-
-            $('clearDataBtn').addEventListener('click', clearAllData);
-
-            // ---------- 20. 保存用户信息 ----------
-            var userFields = ['userClass', 'userName', 'userId', 'userGender'];
-            for (var f = 0; f < userFields.length; f++) {
-                (function(fieldId) {
-                    var el = $(fieldId);
-                    var saved = localStorage.getItem('user_' + fieldId);
-                    if (saved) el.value = saved;
-                    el.addEventListener('change', function() {
-                        localStorage.setItem('user_' + fieldId, this.value);
+                    status('⏳ 正在清空...', true);
+                    db.collection('bottles').where({
+                        _id: _.neq('')
+                    }).remove().then(function() {
+                        status('🗑️ 已清空所有数据', true);
+                        loadBottles();
+                        if (adminPanel.classList.contains('open')) renderAdmin();
+                    })['catch'](function(err) {
+                        status('❌ 清空失败：' + err.message, false);
                     });
-                })(userFields[f]);
+                }
+
+                // ---------- 18. 图片上传事件 ----------
+                throwImageInput.addEventListener('change', function(e) {
+                    var file = e.target.files[0];
+                    if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) {
+                        status('⚠️ 图片超过 5MB，请压缩后上传', false);
+                        this.value = '';
+                        return;
+                    }
+                    compressImage(file).then(function(dataUrl) {
+                        throwImageData = dataUrl;
+                        throwPreview.innerHTML = '<img src="' + dataUrl +
+                            '" alt="预览" style="width:100%;height:100%;object-fit:cover;">';
+                        throwRemoveImage.style.display = 'inline-block';
+                        status('✅ 图片已添加', true);
+                    })['catch'](function(err) {
+                        status('❌ 图片处理失败', false);
+                    });
+                    this.value = '';
+                });
+
+                throwRemoveImage.addEventListener('click', function() {
+                    throwImageData = null;
+                    throwPreview.innerHTML = '➕';
+                    this.style.display = 'none';
+                    status('已移除图片', true);
+                });
+
+                // ---------- 19. 后台按钮 ----------
+                $('adminToggleBtn').addEventListener('click', function() {
+                    if (adminPanel.classList.contains('open')) {
+                        adminPanel.classList.remove('open');
+                        this.textContent = '🔐 后台';
+                        return;
+                    }
+                    var pwd = prompt('🔐 请输入后台密码:');
+                    if (pwd === null) {
+                        status('已取消', true);
+                        return;
+                    }
+                    if (pwd !== ADMIN_PASSWORD) {
+                        status('❌ 密码错误', false);
+                        return;
+                    }
+                    adminPanel.classList.add('open');
+                    this.textContent = '🔐 关闭后台';
+                    renderAdmin();
+                    status('✅ 后台已解锁', true);
+                });
+
+                $('adminCloseBtn').addEventListener('click', function() {
+                    adminPanel.classList.remove('open');
+                    $('adminToggleBtn').textContent = '🔐 后台';
+                });
+
+                $('clearDataBtn').addEventListener('click', clearAllData);
+
+                // ---------- 20. 保存用户信息 ----------
+                var userFields = ['userClass', 'userName', 'userId', 'userGender'];
+                for (var f = 0; f < userFields.length; f++) {
+                    (function(fieldId) {
+                        var el = $(fieldId);
+                        var saved = localStorage.getItem('user_' + fieldId);
+                        if (saved) el.value = saved;
+                        el.addEventListener('change', function() {
+                            localStorage.setItem('user_' + fieldId, this.value);
+                        });
+                    })(userFields[f]);
+                }
+
+                // ---------- 21. 按钮事件 ----------
+                throwBtn.addEventListener('click', throwBottle);
+                pickBtn.addEventListener('click', pickBottle);
+
+                // ---------- 22. 启动 ----------
+                status('🔄 正在连接云端...', true);
+                login();
+
+                window.__app = app;
+                window.__db = db;
+
+                console.log('✅ 漂流瓶已启动，环境 ID: bottle-d9gpcqa9hcbccfe0c');
             }
 
-            // ---------- 21. 按钮事件 ----------
-            throwBtn.addEventListener('click', throwBottle);
-            pickBtn.addEventListener('click', pickBottle);
+            // 等待DOM加载完成后初始化
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(initApp, 500);
+                });
+            } else {
+                setTimeout(initApp, 500);
+            }
 
-            // ---------- 22. 启动 ----------
-            status('🔄 正在连接云端...', true);
-            login();
-
-            window.__app = app;
-            window.__db = db;
-
-            console.log('✅ 漂流瓶已启动，环境 ID: bottle-d9gpcqa9hcbccfe0c');
+            // 如果5秒后还没加载，强制重试
+            setTimeout(function() {
+                if (typeof tcb === 'undefined') {
+                    console.warn('⚠️ 5秒后SDK仍未加载，尝试重新加载...');
+                    var script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/@cloudbase/js-sdk@1.7.0/dist/index.umd.min.js';
+                    document.head.appendChild(script);
+                    setTimeout(initApp, 2000);
+                }
+            }, 5000);
 
         })();
     </script>
