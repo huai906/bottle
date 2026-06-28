@@ -4,15 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🍾 树洞漂流瓶 · 云端版</title>
-    <!-- 使用国内可访问的CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@cloudbase/js-sdk@1.7.0/dist/index.umd.min.js">
-    </script>
-    <!-- 备用CDN -->
-    <script>
-        // 如果主CDN加载失败，尝试备用
-        if (typeof tcb === 'undefined') {
-            document.write('<script src="https://unpkg.com/@cloudbase/js-sdk@1.7.0/dist/index.umd.min.js"><\/script>');
-        }
+    <!-- 使用国内可访问的 CDN -->
+    <script src="https://web.sdk.qcloud.com/tcb/1.0.1/tcb.js">
     </script>
     <style>
         * {
@@ -671,8 +664,9 @@
             // 等待SDK加载完成
             function initApp() {
                 if (typeof tcb === 'undefined') {
-                    console.warn('⚠️ SDK未加载，3秒后重试...');
-                    setTimeout(initApp, 3000);
+                    console.warn('⚠️ SDK未加载，请使用 Live Server 或 GitHub Pages 打开');
+                    document.getElementById('statusArea').textContent = '❌ SDK加载失败，请使用 Live Server 打开';
+                    document.getElementById('statusArea').style.background = '#ffebee';
                     return;
                 }
 
@@ -1586,17 +1580,6 @@
             } else {
                 setTimeout(initApp, 500);
             }
-
-            // 如果5秒后还没加载，强制重试
-            setTimeout(function() {
-                if (typeof tcb === 'undefined') {
-                    console.warn('⚠️ 5秒后SDK仍未加载，尝试重新加载...');
-                    var script = document.createElement('script');
-                    script.src = 'https://cdn.jsdelivr.net/npm/@cloudbase/js-sdk@1.7.0/dist/index.umd.min.js';
-                    document.head.appendChild(script);
-                    setTimeout(initApp, 2000);
-                }
-            }, 5000);
 
         })();
     </script>
